@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Fondo para el estilo "Botánico". Sin texto: los datos se dibujan con jsPDF. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1123" height="794" viewBox="0 0 1123 794" role="img" aria-label="Fondo de certificado botánico con hojas de salvia">
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fdfbf3"/>
+      <stop offset="0.6" stop-color="#f7f4e8"/>
+      <stop offset="1" stop-color="#f1eddd"/>
+    </linearGradient>
+    <filter id="difuso" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="38"/>
+    </filter>
+    <g id="hoja">
+      <path d="M0 0 C 24 -34 70 -34 100 0 C 70 34 24 34 0 0 Z" fill="#879a75"/>
+      <path d="M6 0 C 34 -7 66 -6 94 0" fill="none" stroke="#6f8060" stroke-width="1.6" opacity="0.5"/>
+    </g>
+    <g id="ramita">
+      <path d="M52 170 Q 120 100 250 78" fill="none" stroke="#7f9271" stroke-width="1.6"/>
+      <use href="#hoja" transform="translate(74 148) rotate(-38) scale(0.72)"/>
+      <use href="#hoja" transform="translate(112 120) rotate(-56) scale(0.8)"/>
+      <use href="#hoja" transform="translate(162 100) rotate(-72) scale(0.85)"/>
+      <use href="#hoja" transform="translate(214 86) rotate(-86) scale(0.75)"/>
+      <use href="#hoja" transform="translate(98 108) rotate(15) scale(0.55)"/>
+      <use href="#hoja" transform="translate(150 92) rotate(-8) scale(0.6)"/>
+    </g>
+  </defs>
+
+  <rect width="1123" height="794" fill="url(#fondo)"/>
+  <ellipse cx="70" cy="60" rx="180" ry="150" fill="#dfe7d2" opacity="0.55" filter="url(#difuso)"/>
+  <ellipse cx="1060" cy="740" rx="200" ry="160" fill="#e4ead9" opacity="0.5" filter="url(#difuso)"/>
+  <ellipse cx="1080" cy="60" rx="140" ry="120" fill="#e9eedf" opacity="0.4" filter="url(#difuso)"/>
+
+  <rect x="34" y="34" width="1055" height="726" fill="none" stroke="#a9b798" stroke-width="1.4"/>
+  <rect x="42" y="42" width="1039" height="710" fill="none" stroke="#c4cfb5" stroke-width="0.8"/>
+
+  <use href="#ramita" opacity="0.28"/>
+  <use href="#ramita" transform="translate(1123 794) scale(-1 -1)" opacity="0.28"/>
+  <use href="#ramita" transform="translate(1123 0) scale(-1 1) scale(0.65)" opacity="0.16"/>
+  <use href="#ramita" transform="translate(0 794) scale(1 -1) scale(0.65)" opacity="0.16"/>
+
+  <g fill="#c2a251" opacity="0.45">
+    <circle cx="238" cy="74" r="2.6"/>
+    <circle cx="252" cy="88" r="2"/>
+    <circle cx="1092" cy="58" r="2"/>
+    <circle cx="58" cy="736" r="2"/>
+    <circle cx="886" cy="720" r="2.6"/>
+    <circle cx="872" cy="706" r="2"/>
+  </g>
+</svg>

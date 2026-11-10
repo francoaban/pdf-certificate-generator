@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Fondo para el estilo "Clásico dorado". Sin texto: los datos se dibujan con jsPDF. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1123" height="794" viewBox="0 0 1123 794" role="img" aria-label="Fondo de certificado clásico con marco dorado">
+  <defs>
+    <linearGradient id="crema" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffdf7"/>
+      <stop offset="0.55" stop-color="#fbf6e9"/>
+      <stop offset="1" stop-color="#f4ecd8"/>
+    </linearGradient>
+    <radialGradient id="luz" cx="0.5" cy="0.32" r="0.8">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="oro" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e6d29a"/>
+      <stop offset="0.35" stop-color="#c2a251"/>
+      <stop offset="0.6" stop-color="#f0e0ad"/>
+      <stop offset="1" stop-color="#a9853a"/>
+    </linearGradient>
+    <pattern id="puntos" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#b08a3e" opacity="0.14"/>
+    </pattern>
+    <g id="esquina" fill="none" stroke="#b08a3e">
+      <path d="M0 62 L0 0 L62 0" stroke-width="2.4"/>
+      <path d="M10 48 L10 10 L48 10" stroke-width="1.1" opacity="0.7"/>
+      <path d="M0 0 L14 14" stroke-width="1.2" opacity="0.6"/>
+      <path d="M10 10 l7 7 l-7 7 l-7 -7 Z" fill="#b08a3e" stroke="none"/>
+      <circle cx="36" cy="0" r="2.4" fill="#b08a3e" stroke="none" opacity="0.8"/>
+      <circle cx="0" cy="36" r="2.4" fill="#b08a3e" stroke="none" opacity="0.8"/>
+    </g>
+  </defs>
+
+  <rect width="1123" height="794" fill="url(#crema)"/>
+  <rect width="1123" height="794" fill="url(#luz)"/>
+
+  <rect x="30" y="30" width="1063" height="734" fill="none" stroke="url(#oro)" stroke-width="2.6"/>
+  <rect x="37" y="37" width="1049" height="720" fill="none" stroke="#d9c48d" stroke-width="0.8"/>
+  <rect x="44" y="44" width="1035" height="706" fill="url(#puntos)"/>
+  <rect x="44" y="44" width="1035" height="706" fill="none" stroke="#b08a3e" stroke-width="1" opacity="0.55"/>
+
+  <use href="#esquina" x="44" y="44"/>
+  <use href="#esquina" transform="translate(1079 44) scale(-1 1)"/>
+  <use href="#esquina" transform="translate(44 750) scale(1 -1)"/>
+  <use href="#esquina" transform="translate(1079 750) scale(-1 -1)"/>
+</svg>
