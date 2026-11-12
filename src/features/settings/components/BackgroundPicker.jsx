@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { BACKGROUND_PRESETS } from '../../../certificates/backgrounds'
 import { publicUrl } from '../../../certificates/shared'
 import { isRemoteAsset } from '../../../utils/optionsSchema'
 import { DEFAULT_BACKGROUND_URL, processBackgroundFile } from '../../../utils/background'
+import InfoTip from './InfoTip'
 
 export default function BackgroundPicker({
   options,
@@ -13,6 +14,14 @@ export default function BackgroundPicker({
   const inputRef = useRef(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const backgroundToggleId = useId()
+  const backgroundToggleHintId = `${backgroundToggleId}-hint`
+  const fitId = useId()
+  const fitHintId = `${fitId}-hint`
+  const primaryColorId = useId()
+  const primaryColorHintId = `${primaryColorId}-hint`
+  const secondaryColorId = useId()
+  const secondaryColorHintId = `${secondaryColorId}-hint`
 
   const normalizeSource = (value) =>
     typeof value === 'string' ? value.replace(/^\.?\//, '') : null
@@ -119,22 +128,30 @@ export default function BackgroundPicker({
         </div>
 
         <div className="min-w-0 flex-1 space-y-2">
-          <label
-            className={`flex items-center gap-2 text-sm ${
-              customEnabled ? 'cursor-pointer text-slate-600' : 'text-slate-400'
-            }`}
-          >
-            <input
-              type="checkbox"
-              checked={options.showImageBackground && customEnabled}
-              onChange={(e) =>
-                onChange({ ...options, showImageBackground: e.target.checked })
-              }
-              disabled={!customEnabled}
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600 disabled:opacity-40"
+          <div className="flex items-center gap-1.5">
+            <label
+              className={`flex items-center gap-2 text-sm ${
+                customEnabled ? 'cursor-pointer text-slate-600' : 'text-slate-400'
+              }`}
+            >
+              <input
+                id={backgroundToggleId}
+                type="checkbox"
+                checked={options.showImageBackground && customEnabled}
+                onChange={(e) =>
+                  onChange({ ...options, showImageBackground: e.target.checked })
+                }
+                disabled={!customEnabled}
+                aria-describedby={backgroundToggleHintId}
+                className="h-4 w-4 rounded border-slate-300 text-indigo-600 disabled:opacity-40"
+              />
+              Incluir imagen de fondo
+            </label>
+            <InfoTip
+              text="Si está desactivado, se usa el fondo del estilo seleccionado en lugar de la imagen personalizada."
+              id={backgroundToggleHintId}
             />
-            Incluir imagen de fondo
-          </label>
+          </div>
           <p className="truncate text-xs text-slate-400">
             {customName
               ? `Fondo seleccionado: ${customName}`
@@ -174,9 +191,12 @@ export default function BackgroundPicker({
       />
 
       <div className="space-y-2 border-t border-slate-100 pt-3">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-          Fondos predeterminados
-        </p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            Fondos predeterminados
+          </p>
+          <InfoTip text="Elegí un fondo de la galería. Los fondos vectoriales permiten personalizar sus colores; el floral permite cambiar su color principal." />
+        </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {BACKGROUND_PRESETS.map((preset) => {
             const active = normalizeSource(customSrc) === preset.src
@@ -207,28 +227,37 @@ export default function BackgroundPicker({
         </div>
       </div>
 
-      <label className="block space-y-1 border-t border-slate-100 pt-3">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-          Ajuste de la imagen
-        </span>
+      <div className="space-y-1 border-t border-slate-100 pt-3">
+        <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+          <label htmlFor={fitId}>Ajuste de la imagen</label>
+          <InfoTip
+            text="«Cubrir» llena toda la hoja y recorta el excedente. «Ajustar» muestra la imagen completa con márgenes."
+            id={fitHintId}
+          />
+        </div>
         <select
+          id={fitId}
           value={options.backgroundFit || 'cover'}
           onChange={(e) => onChange({ ...options, backgroundFit: e.target.value })}
+          aria-describedby={fitHintId}
           className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
         >
           <option value="cover">Cubrir la página (recorta si hace falta)</option>
           <option value="contain">Ajustar sin recortar (con márgenes)</option>
         </select>
-      </label>
+      </div>
       <p className="text-xs text-slate-400">
         Las imágenes conservan su proporción y se centran automáticamente.
       </p>
 
       <div className="space-y-2 border-t border-slate-100 pt-3">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-            Colores del fondo
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              Colores del fondo
+            </p>
+            <InfoTip text="Se aplican solo a los fondos vectoriales predeterminados. El papel y los textos conservan su contraste." />
+          </div>
           {hasCustomColors && (
             <button
               type="button"
@@ -240,34 +269,48 @@ export default function BackgroundPicker({
           )}
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <label className="space-y-1">
-            <span className="block text-xs text-slate-500">Principal</span>
-            <span className="flex items-center gap-2">
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <label htmlFor={primaryColorId}>Principal</label>
+              <InfoTip
+                text="Color decorativo principal del fondo vectorial."
+                id={primaryColorHintId}
+              />
+            </div>
+            <div className="flex items-center gap-2">
               <input
+                id={primaryColorId}
                 type="color"
                 value={primaryValue}
                 onChange={(e) => onChange({ ...options, primaryColor: e.target.value })}
                 disabled={!colorizable}
+                aria-describedby={primaryColorHintId}
                 className="h-8 w-10 cursor-pointer rounded border border-slate-200 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-40"
-                aria-label="Color principal del fondo"
               />
               <span className="font-mono text-[11px] text-slate-500">{primaryValue}</span>
-            </span>
-          </label>
-          <label className="space-y-1">
-            <span className="block text-xs text-slate-500">Secundario</span>
-            <span className="flex items-center gap-2">
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <label htmlFor={secondaryColorId}>Secundario</label>
+              <InfoTip
+                text="Color decorativo secundario. En el fondo floral se usa el mismo color principal."
+                id={secondaryColorHintId}
+              />
+            </div>
+            <div className="flex items-center gap-2">
               <input
+                id={secondaryColorId}
                 type="color"
                 value={secondaryValue}
                 onChange={(e) => onChange({ ...options, secondaryColor: e.target.value })}
                 disabled={!secondaryColorizable}
+                aria-describedby={secondaryColorHintId}
                 className="h-8 w-10 cursor-pointer rounded border border-slate-200 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-40"
-                aria-label="Color secundario del fondo"
               />
               <span className="font-mono text-[11px] text-slate-500">{secondaryValue}</span>
-            </span>
-          </label>
+            </div>
+          </div>
         </div>
         <p className="text-xs text-slate-400">
           {activePreset?.primaryOnly

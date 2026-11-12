@@ -36,7 +36,7 @@ export default function CertificatePreview({ record, options }) {
       } finally {
         if (!cancelled) setLoading(false)
       }
-    }, 300)
+    }, 150)
     return () => {
       cancelled = true
       clearTimeout(timer)
@@ -53,11 +53,30 @@ export default function CertificatePreview({ record, options }) {
   const name = record ? resolveRecord(record, options).fullName : ''
   const showError = !!record && !!error
   const shownUrl = record && !showError ? url : null
+  const statusLabel = !record ? 'Sin datos' : loading ? 'Actualizando' : 'Tiempo real'
+  const statusTone = !record
+    ? 'bg-slate-100 text-slate-500'
+    : loading
+      ? 'bg-amber-50 text-amber-700'
+      : 'bg-emerald-50 text-emerald-700'
+  const dotTone = !record
+    ? 'bg-slate-400'
+    : loading
+      ? 'animate-pulse bg-amber-500'
+      : 'bg-emerald-500'
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-slate-700">Vista previa</h2>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-slate-700">Vista previa</h2>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${statusTone}`}
+          >
+            <span className={`h-1.5 w-1.5 rounded-full ${dotTone}`} />
+            {statusLabel}
+          </span>
+        </div>
         {shownUrl && (
           <a
             href={shownUrl}
@@ -69,6 +88,13 @@ export default function CertificatePreview({ record, options }) {
           </a>
         )}
       </div>
+      <p className="sr-only" role="status" aria-live="polite">
+        {!record
+          ? 'No hay datos para la vista previa'
+          : loading
+            ? 'Actualizando la vista previa'
+            : 'Vista previa actualizada'}
+      </p>
 
       <div className="relative mx-auto aspect-[297/210] w-full max-w-[60dvh] overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
         {showError ? (

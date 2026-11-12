@@ -15,28 +15,15 @@ export default function useCertificateGeneration({ options, batch }) {
     [],
   )
 
-  const generateOne = async (record) => {
-    if (busyRef.current) return
-    setGeneratingId(record.id)
-    setError('')
-    try {
-      const { generateCertificate } = await import('../../../utils/pdfGenerator')
-      await generateCertificate(record, options)
-    } catch (generationError) {
-      setError(generationError.message || 'No se pudo generar el certificado.')
-    } finally {
-      setGeneratingId(null)
-    }
-  }
-
-  const runBatch = async (generate) => {
+  const runGeneration = async (generate, recordId = null) => {
     if (busyRef.current) return
     busyRef.current = true
-    setBusy(true)
-    setError('')
-    setProgress(null)
     const controller = new AbortController()
     abortRef.current = controller
+    setBusy(true)
+    setGeneratingId(recordId)
+    setError('')
+    setProgress(null)
     try {
       await generate(controller.signal)
     } catch (generationError) {
@@ -49,20 +36,27 @@ export default function useCertificateGeneration({ options, batch }) {
       busyRef.current = false
       abortRef.current = null
       setBusy(false)
+      setGeneratingId(null)
       setProgress(null)
     }
   }
 
+  const generateOne = (record) =>
+    runGeneration(async (signal) => {
+      const { generateCertificate } = await import('../../../utils/pdfGenerator')
+      await generateCertificate(record, options, { signal })
+    }, record.id)
+
   const onProgress = (done, total) => setProgress({ done, total })
 
   const generateZip = () =>
-    runBatch(async (signal) => {
+    runGeneration(async (signal) => {
       const module = await import('../../../utils/pdfGenerator')
       return module.generateZip(batch, options, { onProgress, signal })
     })
 
   const generateSinglePdf = () =>
-    runBatch(async (signal) => {
+    runGeneration(async (signal) => {
       const module = await import('../../../utils/pdfGenerator')
       return module.generateBulkPdf(batch, options, { onProgress, signal })
     })

@@ -32,7 +32,8 @@ Pinyon Script, Sacramento, serif o sans. El título, el subtítulo y el cuerpo
 tienen selección de tipografía independiente, y cualquier texto acepta
 `**texto**` para negrita. Cada texto del certificado —título, subtítulo, texto
 previo, nombre, documento, cuerpo, fecha y firmas— tiene su propio tamaño, con
-un rango de 80 % a 150 %. La fecha y la ubicación se muestran debajo
+un campo numérico de 80 % a 150 % que permite ajustar el porcentaje de a uno.
+La fecha y la ubicación se muestran debajo
 del cuerpo, alineadas a la derecha; el logo se ubica arriba a la izquierda con
 un alto del 30 % de la hoja. Al cargar un logo personalizado se
 puede activar **«Generar fondo con el logo»**, que agrega una marca de agua

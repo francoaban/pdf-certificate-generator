@@ -1,6 +1,7 @@
 import { resolveNameFont, resolveTextFont } from '../fonts.js'
 import {
   PAGE_WIDTH,
+  SIGNATURE_BASELINE_Y,
   composeDateLine,
   drawCertificateLogo,
   drawSignature,
@@ -117,7 +118,7 @@ export const modernStyle = {
       maxWidth: 120,
     })
 
-    const signatureY = Math.max(170, dateY + 10)
+    const signatureY = Math.max(SIGNATURE_BASELINE_Y, dateY + 10)
 
     drawSignature(doc, {
       centerX: 66,

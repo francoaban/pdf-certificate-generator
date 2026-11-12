@@ -91,9 +91,12 @@ test('schema: validates each font size independently', () => {
   for (const field of fields) {
     assert.equal(normalizeOptions({ [field]: 120 }).options[field], 120)
     assert.equal(normalizeOptions({ [field]: '125' }).options[field], 125)
-    assert.equal(normalizeOptions({ [field]: 127 }).options[field], 125)
+    assert.equal(normalizeOptions({ [field]: 127 }).options[field], 127)
     assert.equal(normalizeOptions({ [field]: 200 }).options[field], 150)
-    assert.equal(normalizeOptions({ [field]: 'abc' }).options[field], 100)
+    assert.equal(
+      normalizeOptions({ [field]: 'abc' }).options[field],
+      DEFAULT_OPTIONS[field],
+    )
     assert.throws(
       () => normalizeOptions({ [field]: 200 }, { strict: true }),
       new RegExp(field, 'i'),

@@ -21,6 +21,9 @@ export { DEFAULT_OPTIONS }
 
 const W = 297
 const H = 210
+const QR_SIZE = 16
+const QR_RIGHT_MARGIN = 20
+const QR_BOTTOM_MARGIN = 22
 
 /* ---------- Preparación de recursos (se cachea entre certificados) ---------- */
 async function prepare(options) {
@@ -199,8 +202,10 @@ async function drawCertificate(doc, record, opts, style, logo, signal) {
     })
     const qr = await getQrDataUrl(payload)
     throwIfAborted(signal)
-    doc.addImage(qr, 'PNG', 272, 177, 16, 16, `verification-${view.code}`, 'FAST')
-    drawWrappedText(doc, view.code, 280, 196, {
+    const qrX = W - QR_RIGHT_MARGIN - QR_SIZE
+    const qrY = H - QR_BOTTOM_MARGIN - QR_SIZE
+    doc.addImage(qr, 'PNG', qrX, qrY, QR_SIZE, QR_SIZE, `verification-${view.code}`, 'FAST')
+    drawWrappedText(doc, view.code, qrX + QR_SIZE / 2, qrY + QR_SIZE + 3, {
       width: 26,
       size: 12,
       font: 'helvetica',
@@ -247,13 +252,17 @@ export async function buildPreviewUrl(record, options = {}) {
   return URL.createObjectURL(doc.output('blob'))
 }
 
-export async function generateCertificate(record, options = {}) {
+export async function generateCertificate(record, options = {}, config = {}) {
   if (!record || (!String(record.nombre ?? '').trim() && !String(record.apellido ?? '').trim())) {
     throw new Error('El registro no tiene nombre ni apellido.')
   }
+  const { signal } = batchConfig(config)
+  throwIfAborted(signal)
   const ctx = await prepare(options)
+  throwIfAborted(signal)
   const doc = createDoc(ctx)
-  const view = await drawCertificate(doc, record, ctx.opts, ctx.style, ctx.logo)
+  const view = await drawCertificate(doc, record, ctx.opts, ctx.style, ctx.logo, signal)
+  throwIfAborted(signal)
   const name = buildFileName(view, record, ctx.opts.fileNameFormat)
   doc.save(`${name}.pdf`)
 }
@@ -262,6 +271,7 @@ export async function generateCertificate(record, options = {}) {
 export async function generateBulkPdf(records, options = {}, config = {}) {
   assertRecords(records)
   const { onProgress, signal } = batchConfig(config)
+  throwIfAborted(signal)
   const ctx = await prepare(options)
   const doc = createDoc(ctx)
 
@@ -285,6 +295,7 @@ export async function generateBulkPdf(records, options = {}, config = {}) {
 export async function generateZip(records, options = {}, config = {}) {
   assertRecords(records)
   const { onProgress, signal } = batchConfig(config)
+  throwIfAborted(signal)
   const ctx = await prepare(options)
   const { default: JSZip } = await import('jszip')
   const zip = new JSZip()
