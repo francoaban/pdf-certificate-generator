@@ -6,7 +6,7 @@ import { applyCase, normalizeText } from '../../../utils/text'
 
 const PAGE_SIZE = 25
 
-function EditableCell({ value, display, onCommit, invalid, warn, title, placeholder, mono }) {
+function EditableCell({ value, display, onCommit, invalid, warn, title, placeholder, mono, disabled }) {
   const [draft, setDraft] = useState(null)
   const cancelled = useRef(false)
 
@@ -19,6 +19,7 @@ function EditableCell({ value, display, onCommit, invalid, warn, title, placehol
   return (
     <input
       value={draft !== null ? draft : (display ?? value)}
+      disabled={disabled}
       title={title}
       placeholder={placeholder}
       onFocus={() => {
@@ -111,7 +112,8 @@ export default function DataTable({
           className="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
         />
         <span className="text-xs text-slate-500">
-          {filtered.length} de {records.length} · Podés editar las celdas
+          {filtered.length} de {records.length} ·{' '}
+          {busy ? 'Edición bloqueada durante la generación' : 'Podés editar las celdas'}
         </span>
       </div>
 
@@ -124,6 +126,7 @@ export default function DataTable({
                   type="checkbox"
                   checked={allSelected}
                   onChange={() => onSelectMany(filteredIds, !allSelected)}
+                  disabled={busy}
                   title="Seleccionar todos (según el filtro)"
                   aria-label="Seleccionar todos los certificados visibles"
                   className="h-4 w-4 rounded border-slate-300 text-indigo-600"
@@ -155,6 +158,7 @@ export default function DataTable({
                       type="checkbox"
                       checked={selected.has(r.id)}
                       onChange={() => onToggle(r.id)}
+                      disabled={busy}
                       aria-label={`Seleccionar certificado de ${[r.nombre, r.apellido].filter(Boolean).join(' ')}`}
                       className="h-4 w-4 rounded border-slate-300 text-indigo-600"
                     />
@@ -164,6 +168,7 @@ export default function DataTable({
                     <EditableCell
                       value={r.nombre}
                       display={applyCase(r.nombre, options.caseMode)}
+                      disabled={busy}
                       onCommit={(v) => onUpdate(r.id, { nombre: v.trim() })}
                     />
                   </td>
@@ -171,12 +176,14 @@ export default function DataTable({
                     <EditableCell
                       value={r.apellido}
                       display={applyCase(r.apellido, options.caseMode)}
+                      disabled={busy}
                       onCommit={(v) => onUpdate(r.id, { apellido: v.trim() })}
                     />
                   </td>
                   <td className="px-1 py-1">
                     <select
                       value={type}
+                      disabled={busy}
                       onChange={(e) =>
                         onUpdate(r.id, {
                           docType: e.target.value,
@@ -196,6 +203,7 @@ export default function DataTable({
                   <td className="px-1 py-1">
                     <EditableCell
                       value={formatDocument(r.docNumber, type, { dots: options.docDots })}
+                      disabled={busy}
                       placeholder="—"
                       invalid={!!issue?.invalid}
                       warn={!issue?.invalid && issue?.duplicate}
@@ -207,6 +215,7 @@ export default function DataTable({
                     <td key={column.key} className="px-1 py-1">
                       <EditableCell
                         value={column.key === 'codigo' ? r.codigo || '' : r[column.key] || ''}
+                        disabled={busy}
                         display={
                           column.key === 'fecha' ? normalizeDate(r.fecha) : undefined
                         }

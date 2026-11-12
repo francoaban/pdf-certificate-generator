@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
+import InfoTip from './InfoTip'
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 export default function SignaturePicker({ label, value, onChange }) {
   const [error, setError] = useState('')
+  const hintId = useId()
 
   const handleFile = async (file) => {
     if (!file) return
@@ -70,7 +72,13 @@ export default function SignaturePicker({ label, value, onChange }) {
 
   return (
     <div className="space-y-2 rounded-lg border border-slate-200 p-3">
-      <p className="text-xs font-semibold text-slate-600">{label}</p>
+      <div className="flex items-center gap-1.5">
+        <p className="text-xs font-semibold text-slate-600">{label}</p>
+        <InfoTip
+          text="La firma debe ser un PNG con fondo transparente, de hasta 5 MB. Se muestra encima de la línea de firma."
+          id={hintId}
+        />
+      </div>
       <div className="flex items-center gap-3">
         <div className="flex h-12 w-28 items-center justify-center overflow-hidden rounded border border-dashed border-slate-300 bg-[linear-gradient(45deg,#f1f5f9_25%,transparent_25%,transparent_75%,#f1f5f9_75%),linear-gradient(45deg,#f1f5f9_25%,white_25%,white_75%,#f1f5f9_75%)] bg-[size:12px_12px] bg-[position:0_0,6px_6px]">
           {value?.dataUrl ? (
@@ -85,6 +93,8 @@ export default function SignaturePicker({ label, value, onChange }) {
             <input
               type="file"
               accept="image/png"
+              aria-label={`Elegir imagen de ${label.toLowerCase()}`}
+              aria-describedby={hintId}
               className="hidden"
               onChange={(event) => {
                 handleFile(event.target.files?.[0])

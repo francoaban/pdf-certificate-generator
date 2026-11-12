@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import FileUploader from './features/import/components/FileUploader'
 import DataTable from './features/records/components/DataTable'
-import SettingsPanel from './features/settings/components/SettingsPanel'
+import SettingsPanel from './features/settings/SettingsPanel'
 import CertificatePreview from './features/certificates/components/CertificatePreview'
 import UpdatePrompt from './components/UpdatePrompt'
 import { computeIssues } from './utils/issues'
@@ -305,7 +305,9 @@ export default function App() {
                       <p aria-live="polite">
                         {generation.progress
                           ? `Generando ${generation.progress.done} de ${generation.progress.total}…`
-                          : 'Generando archivo…'}
+                          : generation.generatingId !== null
+                            ? 'Generando certificado…'
+                            : 'Preparando archivo…'}
                       </p>
                       <button
                         type="button"

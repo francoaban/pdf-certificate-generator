@@ -17,6 +17,8 @@ import {
 export const PAGE_WIDTH = 297
 export const PAGE_HEIGHT = 210
 export const LOGO_HEIGHT_RATIO = 0.3
+/** Línea base de las firmas, más cerca del borde inferior de la hoja. */
+export const SIGNATURE_BASELINE_Y = 180
 
 /** Factor de tamaño de un texto concreto del certificado. */
 export function getFontScale(options = {}, field = null) {

@@ -2,7 +2,7 @@ import { DEFAULT_NAME_FONT } from './fonts.js'
 
 export const FONT_SIZE_MIN = 80
 export const FONT_SIZE_MAX = 150
-export const FONT_SIZE_STEP = 5
+export const FONT_SIZE_STEP = 1
 export const FONT_SIZE_DEFAULT = 100
 
 /**
@@ -25,25 +25,25 @@ export const DEFAULT_OPTIONS = {
   bodyText: 'Por su destacada participación y compromiso, otorgándose el presente en reconocimiento a su dedicación y esfuerzo.',
   titleFont: 'auto', // auto conserva la fuente del estilo
   subtitleFont: 'auto',
-  bodyFont: 'auto',
+  bodyFont: 'serif',
   // Porcentaje de tamaño de cada texto; 100 = tamaño original del estilo.
-  titleSize: FONT_SIZE_DEFAULT,
-  subtitleSize: FONT_SIZE_DEFAULT,
-  preTextSize: FONT_SIZE_DEFAULT,
-  nameSize: FONT_SIZE_DEFAULT,
-  bodySize: FONT_SIZE_DEFAULT,
-  dateSize: FONT_SIZE_DEFAULT,
-  signatureSize: FONT_SIZE_DEFAULT,
-  documentSize: FONT_SIZE_DEFAULT,
+  titleSize: 135,
+  subtitleSize: 115,
+  preTextSize: 100,
+  nameSize: 100,
+  bodySize: 150,
+  dateSize: 140,
+  signatureSize: 100,
+  documentSize: 100,
   signatureLeft: 'Director/a',
   signatureRight: 'Coordinador/a',
   date: '',
   useLogo: true,
   customLogo: null,
-  backgroundFromLogo: false, // marca de agua con el logo personalizado
+  backgroundFromLogo: true, // marca de agua con el logo personalizado
   signatureLeftImage: null,
   signatureRightImage: null,
-  caseMode: 'asis', // asis | upper | title
+  caseMode: 'title', // asis | upper | title
   nameFont: DEFAULT_NAME_FONT, // auto | great-vibes | parisienne | pinyon-script | sacramento | serif | sans
   showDocument: true, // mostrar el documento en el certificado
   docDots: true, // 12.345.678 vs 12345678
@@ -55,15 +55,15 @@ export const DEFAULT_OPTIONS = {
   showProvince: false,
   country: 'Argentina',
   showCountry: false,
-  imageBackground: null, // asset {dataUrl, ratio, name} o URL/data URL para integraciones
-  showImageBackground: false, // si false, usa el fondo del estilo o `background` en lugar de la imagen personalizada
+  imageBackground: 'backgrounds/rojo-floral.png', // asset {dataUrl, ratio, name} o URL/data URL para integraciones
+  showImageBackground: true, // si false, usa el fondo del estilo o `background` en lugar de la imagen personalizada
 
   // --- Diseño ---
-  style: 'clasico', // clasico | moderno | elegante | botanico
+  style: 'botanico', // clasico | moderno | elegante | botanico
   useBackground: true,
   background: null, // URL o data URL para reemplazar el fondo del estilo
   backgroundFit: 'cover', // cover (llenar y recortar) | contain (ajustar sin recortar)
   primaryColor: null, // color decorativo principal del fondo (hex) | null = paleta del fondo
   secondaryColor: null, // color decorativo secundario del fondo (hex) | null = paleta del fondo
-  showVerificationQr: true,
+  showVerificationQr: false,
 }
