@@ -1,5 +1,6 @@
 import { getCurrentDate } from '../../../../certificates/defaults.js'
 import SignaturePicker from '../../components/SignaturePicker'
+import AlignmentField from '../components/AlignmentField'
 import RangeField from '../components/RangeField'
 import SettingsCard, {
   Field,
@@ -71,6 +72,21 @@ export default function DateSignatureSettings({
           hint="Ajusta solo los nombres o cargos de las firmas."
           value={options.signatureSize}
           onChange={(value) => onChange({ ...options, signatureSize: value })}
+        />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <AlignmentField
+          label="Alineación de la fecha"
+          hint="«Automática» conserva la alineación del estilo. Si coincide con la de la ubicación, se muestran en una sola línea."
+          value={options.dateAlign}
+          onChange={(value) => onChange({ ...options, dateAlign: value })}
+        />
+        <AlignmentField
+          label="Alineación de la ubicación"
+          hint="«Automática» conserva la alineación del estilo. Si no hay ubicación, solo se muestra la fecha."
+          value={options.locationAlign}
+          onChange={(value) => onChange({ ...options, locationAlign: value })}
         />
       </div>
 

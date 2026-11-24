@@ -55,6 +55,26 @@ test('rich text: draws bold segments using the bold font variant', () => {
   )
 })
 
+test('rich text: measures letter spacing in document units when centering', () => {
+  const doc = createFakeDoc()
+  drawRichText(doc, 'A **B**', 0, 20, {
+    size: 12,
+    font: 'times',
+    style: 'normal',
+    align: 'center',
+    charSpace: 2,
+  })
+
+  const textCalls = doc.calls.filter((call) => call[0] === 'text')
+  assert.deepEqual(
+    textCalls.map((call) => [call[1], call[2]]),
+    [
+      ['A ', -3.5],
+      ['B', 2.5],
+    ],
+  )
+})
+
 test('rich text: simulates bold for custom TTF fonts that only have a normal style', () => {
   const doc = createFakeDoc()
   drawRichText(doc, '**Hola**', 10, 20, {

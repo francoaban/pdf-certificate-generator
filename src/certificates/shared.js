@@ -1,3 +1,4 @@
+import { resolveAlignment } from './alignment.js'
 import {
   FONT_SIZE_DEFAULT,
   FONT_SIZE_MAX,
@@ -166,9 +167,14 @@ export function composePlaceLine(options = {}) {
     .join(', ')
 }
 
-export function composeDateLine(options) {
-  const date = normalizeDate(options.date || '') || getCurrentDate()
-  return [composePlaceLine(options), date].filter(Boolean).join(' · ')
+export function composeDateValue(options = {}) {
+  return normalizeDate(options.date || '') || getCurrentDate()
+}
+
+export function composeDateLine(options = {}) {
+  return [composePlaceLine(options), composeDateValue(options)]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 /** Dibuja texto con tamaño ajustable y espaciado entre letras. */
@@ -203,6 +209,10 @@ export function drawText(
     })
   }
 
+  const textValue = String(text)
+  const measureWidth = () =>
+    doc.getTextWidth(textValue) +
+    (charSpace ? charSpace * Math.max(0, textValue.length - 1) : 0)
   const drawStyle = safeFontStyle(font, style)
   const syntheticBold = needsSyntheticBold(font, style)
   doc.setFont(font, drawStyle)
@@ -210,7 +220,7 @@ export function drawText(
   doc.setFontSize(finalSize)
 
   if (maxWidth) {
-    while (finalSize > minSize && doc.getTextWidth(String(text)) > maxWidth) {
+    while (finalSize > minSize && measureWidth() > maxWidth) {
       finalSize = Math.max(minSize, Math.round((finalSize - 0.5) * 10) / 10)
       doc.setFontSize(finalSize)
     }
@@ -218,9 +228,22 @@ export function drawText(
 
   doc.setTextColor(color[0], color[1], color[2])
   if (charSpace) doc.setCharSpace(charSpace)
-  doc.text(String(text), x, y, { align })
+
+  // jsPDF calcula `align` sin sumar el espaciado entre letras. Para textos con
+  // `charSpace`, se calcula el ancho real y se posiciona el inicio a mano.
+  const resolvedAlign = charSpace ? 'left' : align
+  const startX =
+    charSpace && align !== 'left'
+      ? align === 'center'
+        ? x - measureWidth() / 2
+        : x - measureWidth()
+      : x
+
+  doc.text(textValue, startX, y, { align: resolvedAlign })
   if (syntheticBold) {
-    doc.text(String(text), x + SYNTHETIC_BOLD_OFFSET, y, { align })
+    doc.text(textValue, startX + SYNTHETIC_BOLD_OFFSET, y, {
+      align: resolvedAlign,
+    })
   }
   if (charSpace) doc.setCharSpace(0)
 
@@ -230,6 +253,107 @@ export function drawText(
 /** Texto centrado en el ancho de la página. */
 export function drawCenteredText(doc, text, y, options = {}) {
   return drawText(doc, text, PAGE_WIDTH / 2, y, { ...options, align: 'center' })
+}
+
+/**
+ * Dibuja un texto alineado a la izquierda, al centro o a la derecha dentro de
+ * un rango horizontal. El centro del rango no tiene que coincidir con el centro
+ * de la hoja (por ejemplo, en el estilo moderno el logo reduce el ancho útil).
+ */
+export function drawAlignedText(
+  doc,
+  text,
+  y,
+  {
+    alignment = 'center',
+    fallback = alignment,
+    left = 0,
+    right = PAGE_WIDTH,
+    center,
+    ...textOptions
+  } = {},
+) {
+  const resolved = resolveAlignment(alignment, fallback)
+  const centerX = center ?? (left + right) / 2
+  const x = resolved === 'left' ? left : resolved === 'right' ? right : centerX
+  const availableWidth = Math.max(1, right - left)
+  const requestedWidth = textOptions.maxWidth ?? availableWidth
+  const maxWidth =
+    resolved === 'center'
+      ? requestedWidth
+      : Math.min(requestedWidth, availableWidth)
+
+  return drawText(doc, text, x, y, {
+    ...textOptions,
+    align: resolved,
+    maxWidth,
+  })
+}
+
+/**
+ * Devuelve el borde izquierdo seguro para textos alineados a la izquierda.
+ * Evita que el título o el subtítulo queden debajo del logo.
+ */
+export function getSafeTextLeft(
+  logoBox,
+  fallback,
+  right,
+  { gap = 12, minWidth = 60 } = {},
+) {
+  if (!logoBox) return fallback
+  return Math.min(
+    right - minWidth,
+    Math.max(fallback, logoBox.x + logoBox.width + gap),
+  )
+}
+
+/**
+ * Dibuja ubicación y fecha. Si comparten alineación se muestran en una sola
+ * línea separadas por «·»; si no, cada una ocupa su propia línea.
+ */
+export function drawDateAndLocation(
+  doc,
+  options = {},
+  {
+    y,
+    size = 9,
+    font = 'times',
+    style = 'italic',
+    color = [0, 0, 0],
+    align = 'right',
+    left = 30,
+    right = PAGE_WIDTH - 30,
+    maxWidth = 120,
+    lineHeight = 1.35,
+  } = {},
+) {
+  const location = composePlaceLine(options)
+  const date = composeDateValue(options)
+  const locationAlign = resolveAlignment(options.locationAlign, align)
+  const dateAlign = resolveAlignment(options.dateAlign, align)
+  const lineStep = size * 0.352778 * lineHeight
+
+  const drawLine = (text, lineY, alignment) =>
+    drawAlignedText(doc, text, lineY, {
+      alignment,
+      left,
+      right,
+      size,
+      font,
+      style,
+      color,
+      maxWidth,
+    })
+
+  if (!location || locationAlign === dateAlign) {
+    const combined = [location, date].filter(Boolean).join(' · ')
+    drawLine(combined, y, location ? locationAlign : dateAlign)
+    return { endY: y, lines: 1 }
+  }
+
+  drawLine(location, y, locationAlign)
+  drawLine(date, y + lineStep, dateAlign)
+  return { endY: y + lineStep, lines: 2 }
 }
 
 /** Texto multilínea con ajuste automático. */

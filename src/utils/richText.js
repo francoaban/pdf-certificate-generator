@@ -8,7 +8,6 @@ const STANDARD_FONTS = new Set([
   'zapfdingbats',
 ])
 export const SYNTHETIC_BOLD_OFFSET = 0.18
-const POINTS_TO_MM = 0.352778
 
 export function hasBoldMarkup(text) {
   return typeof text === 'string' && text.includes(BOLD_MARKER)
@@ -64,7 +63,7 @@ export function needsSyntheticBold(font, style = 'normal', bold = false) {
 
 function segmentWidth(doc, text, charSpace = 0) {
   if (!text) return 0
-  return doc.getTextWidth(text) + (charSpace ? charSpace * POINTS_TO_MM * text.length : 0)
+  return doc.getTextWidth(text) + (charSpace ? charSpace * text.length : 0)
 }
 
 function applySegmentFont(doc, font, style, bold) {
@@ -108,11 +107,15 @@ export function drawRichText(
       applySegmentFont(doc, font, style, segment.bold)
       return total + segmentWidth(doc, segment.text, charSpace)
     }, 0)
+  const measureVisible = () => {
+    const width = measure()
+    return width && charSpace ? width - charSpace : width
+  }
 
   let finalSize = size
   doc.setFontSize(finalSize)
   if (maxWidth) {
-    while (finalSize > minSize && measure() > maxWidth) {
+    while (finalSize > minSize && measureVisible() > maxWidth) {
       finalSize = Math.max(minSize, Math.round((finalSize - 0.5) * 10) / 10)
       doc.setFontSize(finalSize)
     }
@@ -121,7 +124,7 @@ export function drawRichText(
   doc.setTextColor(color[0], color[1], color[2])
   if (charSpace) doc.setCharSpace(charSpace)
 
-  const totalWidth = measure()
+  const totalWidth = measureVisible()
   let cursor =
     align === 'center'
       ? x - totalWidth / 2

@@ -21,6 +21,10 @@ export function getCurrentDate() {
 export const DEFAULT_OPTIONS = {
   title: 'CERTIFICADO',
   subtitle: 'DE RECONOCIMIENTO',
+  titleAlign: 'auto', // auto | left | center | right
+  subtitleAlign: 'auto',
+  locationAlign: 'auto',
+  dateAlign: 'auto',
   preText: 'Se otorga el presente certificado a',
   bodyText: 'Por su destacada participación y compromiso, otorgándose el presente en reconocimiento a su dedicación y esfuerzo.',
   titleFont: 'auto', // auto conserva la fuente del estilo

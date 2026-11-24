@@ -1,4 +1,5 @@
 import { NAME_FONTS } from '../../../../certificates/fonts.js'
+import AlignmentField from '../components/AlignmentField'
 import RangeField from '../components/RangeField'
 import SettingsCard, { Field, inputClass } from '../components/SettingsCard'
 
@@ -49,6 +50,12 @@ export default function ContentSettings({ options, onChange, set }) {
             value={options.titleSize}
             onChange={(value) => onChange({ ...options, titleSize: value })}
           />
+          <AlignmentField
+            label="Alineación del título"
+            hint="«Automática» conserva la alineación definida por el estilo del certificado."
+            value={options.titleAlign}
+            onChange={(value) => onChange({ ...options, titleAlign: value })}
+          />
         </div>
 
         <div className="space-y-3 p-3">
@@ -84,6 +91,12 @@ export default function ContentSettings({ options, onChange, set }) {
             hint="Ajusta solo el subtítulo, sin afectar el título ni el cuerpo."
             value={options.subtitleSize}
             onChange={(value) => onChange({ ...options, subtitleSize: value })}
+          />
+          <AlignmentField
+            label="Alineación del subtítulo"
+            hint="«Automática» conserva la alineación definida por el estilo del certificado."
+            value={options.subtitleAlign}
+            onChange={(value) => onChange({ ...options, subtitleAlign: value })}
           />
         </div>
       </SettingsCard>
