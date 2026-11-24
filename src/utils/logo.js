@@ -1,14 +1,22 @@
-import escudoUrl from '../assets/logo-generico.png'
+import logoUrl from '../assets/logo-generico.svg'
 import { processImageFile } from './imageAsset.js'
 
-export const DEFAULT_LOGO_URL = escudoUrl
+export const DEFAULT_LOGO_URL = logoUrl
 
 const MAX_HEIGHT = 400
 const MAX_WIDTH = 800
 const MAX_PIXELS = 16_000_000
+const DEFAULT_LOGO_SIZE = 1200
 
-// Carga una imagen, la reduce y devuelve { dataUrl, ratio }.
-function rasterize(src) {
+// Carga una imagen, la ajusta y devuelve { dataUrl, ratio }.
+function rasterize(
+  src,
+  {
+    maxHeight = MAX_HEIGHT,
+    maxWidth = MAX_WIDTH,
+    allowUpscale = false,
+  } = {},
+) {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
@@ -20,10 +28,14 @@ function rasterize(src) {
         reject(new Error('La imagen tiene demasiados píxeles.'))
         return
       }
-      const scale = Math.min(1, MAX_HEIGHT / img.naturalHeight, MAX_WIDTH / img.naturalWidth)
+      const fitScale = Math.min(
+        maxHeight / img.naturalHeight,
+        maxWidth / img.naturalWidth,
+      )
+      const scale = allowUpscale ? fitScale : Math.min(1, fitScale)
       const canvas = document.createElement('canvas')
-      canvas.width = Math.round(img.naturalWidth * scale)
-      canvas.height = Math.round(img.naturalHeight * scale)
+      canvas.width = Math.max(1, Math.round(img.naturalWidth * scale))
+      canvas.height = Math.max(1, Math.round(img.naturalHeight * scale))
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
       resolve({
         dataUrl: canvas.toDataURL('image/png'),
@@ -37,9 +49,13 @@ function rasterize(src) {
 
 let defaultLogoPromise = null
 
-/** Escudo del IPSEL (se procesa una sola vez). */
+/** Logo genérico (se procesa una sola vez). */
 export function loadDefaultLogo() {
-  defaultLogoPromise ??= rasterize(escudoUrl)
+  defaultLogoPromise ??= rasterize(logoUrl, {
+    maxHeight: DEFAULT_LOGO_SIZE,
+    maxWidth: DEFAULT_LOGO_SIZE,
+    allowUpscale: true,
+  })
   return defaultLogoPromise
 }
 

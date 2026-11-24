@@ -64,6 +64,14 @@ const COLOR_MAPS = {
     '#e9eedf': 'secondaryLight3',
     '#c2a251': 'secondaryDark',
   },
+  'rojo-floral': {
+    '#a83837': 'primary',
+    '#be6a69': 'floralLight1',
+    '#cf9291': 'floralLight2',
+    '#e1b9b9': 'floralLight3',
+    '#efdada': 'floralLight4',
+    '#f8eeee': 'floralLight5',
+  },
 }
 
 export function getBackgroundPalette(id) {
@@ -118,6 +126,11 @@ function buildVariants(primary, secondary) {
     primaryDark2: mixColor(primary, '#000000', 0.32),
     primaryLight: mixColor(primary, '#ffffff', 0.3),
     primaryLight2: mixColor(primary, '#ffffff', 0.5),
+    floralLight1: mixColor(primary, '#ffffff', 0.25),
+    floralLight2: mixColor(primary, '#ffffff', 0.45),
+    floralLight3: mixColor(primary, '#ffffff', 0.65),
+    floralLight4: mixColor(primary, '#ffffff', 0.815),
+    floralLight5: mixColor(primary, '#ffffff', 0.915),
     secondary,
     secondaryDark: mixColor(secondary, '#000000', 0.18),
     secondaryDark2: mixColor(secondary, '#000000', 0.32),
@@ -151,84 +164,4 @@ export function colorizeBackgroundSvg(svg, id, primary, secondary) {
   })
 }
 
-function rgbToHsl(red, green, blue) {
-  const r = red / 255
-  const g = green / 255
-  const b = blue / 255
-  const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  const lightness = (max + min) / 2
 
-  if (max === min) return [0, 0, lightness]
-
-  const delta = max - min
-  const saturation =
-    lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min)
-  let hue
-
-  if (max === r) hue = (g - b) / delta + (g < b ? 6 : 0)
-  else if (max === g) hue = (b - r) / delta + 2
-  else hue = (r - g) / delta + 4
-
-  return [hue * 60, saturation, lightness]
-}
-
-function hslToRgb(hue, saturation, lightness) {
-  const normalized = (((hue % 360) + 360) % 360) / 60
-  const chroma = (1 - Math.abs(2 * lightness - 1)) * saturation
-  const x = chroma * (1 - Math.abs((normalized % 2) - 1))
-  const offset = lightness - chroma / 2
-  let red
-  let green
-  let blue
-
-  if (normalized < 1) [red, green, blue] = [chroma, x, 0]
-  else if (normalized < 2) [red, green, blue] = [x, chroma, 0]
-  else if (normalized < 3) [red, green, blue] = [0, chroma, x]
-  else if (normalized < 4) [red, green, blue] = [0, x, chroma]
-  else if (normalized < 5) [red, green, blue] = [x, 0, chroma]
-  else [red, green, blue] = [chroma, 0, x]
-
-  return [(red + offset) * 255, (green + offset) * 255, (blue + offset) * 255]
-}
-
-/**
- * Recolorea los trazos rojos del fondo floral conservando el papel blanco y
- * las transparencias. Solo se modifican los píxeles con un tono rojizo.
- */
-export function recolorFloralPixels(data, primary) {
-  if (!data || typeof data.length !== 'number') return data
-
-  const fallback = BACKGROUND_PALETTES['rojo-floral'].primary
-  const targetHex = normalizeHex(primary, fallback)
-  const [targetRed, targetGreen, targetBlue] = parseHex(targetHex)
-  const [targetHue, targetSaturation] = rgbToHsl(
-    targetRed,
-    targetGreen,
-    targetBlue,
-  )
-
-  for (let index = 0; index < data.length; index += 4) {
-    if (data[index + 3] === 0) continue
-
-    const red = data[index]
-    const green = data[index + 1]
-    const blue = data[index + 2]
-    const chroma = Math.max(red, green, blue) - Math.min(red, green, blue)
-    if (chroma < 6) continue
-
-    const [hue, , lightness] = rgbToHsl(red, green, blue)
-    if (hue > 30 && hue < 330) continue
-
-    const [nextRed, nextGreen, nextBlue] = hslToRgb(
-      targetHue,
-      targetSaturation,
-      lightness,
-    )
-    data[index] = nextRed
-    data[index + 1] = nextGreen
-    data[index + 2] = nextBlue
-  }
-
-  return data
-}

@@ -16,9 +16,8 @@ export const BACKGROUND_PRESETS = [
   {
     id: 'rojo-floral',
     label: 'Rojo floral',
-    src: 'backgrounds/rojo-floral.png',
+    src: 'backgrounds/rojo-floral.svg',
     palette: BACKGROUND_PALETTES['rojo-floral'],
-    recolor: 'bitmap',
     primaryOnly: true,
   },
   ...CERTIFICATE_STYLES.map(({ id, name, background }) => ({

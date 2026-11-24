@@ -55,7 +55,7 @@ export const DEFAULT_OPTIONS = {
   showProvince: false,
   country: 'Argentina',
   showCountry: false,
-  imageBackground: 'backgrounds/rojo-floral.png', // asset {dataUrl, ratio, name} o URL/data URL para integraciones
+  imageBackground: 'backgrounds/rojo-floral.svg', // asset {dataUrl, ratio, name} o URL/data URL para integraciones
   showImageBackground: true, // si false, usa el fondo del estilo o `background` en lugar de la imagen personalizada
 
   // --- Diseño ---
