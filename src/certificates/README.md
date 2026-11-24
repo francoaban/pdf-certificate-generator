@@ -57,8 +57,15 @@ título, subtítulo y cuerpo se eligen de forma independiente con
 conserva la tipografía de cada estilo. Cada texto se escala por separado con
 `options.titleSize`, `subtitleSize`, `preTextSize`, `nameSize`, `bodySize`,
 `dateSize`, `signatureSize` y `documentSize` (100 por defecto, entre 80 y 150).
-La fecha y la ubicación se dibujan debajo del cuerpo y alineadas a la derecha. El
-logo se ubica arriba a la izquierda con una altura del 30 % de la hoja y ancho
+La alineación de título, subtítulo, ubicación y fecha se controla con
+`options.titleAlign`, `subtitleAlign`, `locationAlign` y `dateAlign`
+(`auto`, `left`, `center` o `right`). `auto` conserva la composición del estilo:
+centrada en clásico, elegante y botánico, y a la izquierda en moderno. Las
+alineaciones a la izquierda reservan el espacio ocupado por el logo para evitar
+superposiciones. Si la ubicación y la fecha comparten alineación se dibujan en
+una sola línea; si no, cada una ocupa su propia línea. Por defecto, la fecha y
+la ubicación se dibujan debajo del cuerpo y alineadas a la derecha. El logo se
+ubica arriba a la izquierda con una altura del 30 % de la hoja y ancho
 proporcional.
 
 En la interfaz, el estilo se elige en **Configuración → Diseño → Estilo del

@@ -115,6 +115,27 @@ test('schema: migrates the old global font scale to each text', () => {
   assert.equal(options.signatureSize, 120)
 })
 
+test('schema: validates independent text alignments', () => {
+  for (const field of [
+    'titleAlign',
+    'subtitleAlign',
+    'locationAlign',
+    'dateAlign',
+  ]) {
+    for (const value of ['auto', 'left', 'center', 'right']) {
+      assert.equal(normalizeOptions({ [field]: value }).options[field], value)
+    }
+    assert.equal(
+      normalizeOptions({ [field]: 'justify' }).options[field],
+      DEFAULT_OPTIONS[field],
+    )
+    assert.throws(
+      () => normalizeOptions({ [field]: 'justify' }, { strict: true }),
+      new RegExp(field, 'i'),
+    )
+  }
+})
+
 test('schema: validates the background fit mode', () => {
   assert.equal(normalizeOptions({ backgroundFit: 'contain' }).options.backgroundFit, 'contain')
   assert.equal(

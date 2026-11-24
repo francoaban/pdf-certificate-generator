@@ -2,8 +2,9 @@ import { resolveNameFont, resolveTextFont } from '../fonts.js'
 import {
   PAGE_WIDTH,
   SIGNATURE_BASELINE_Y,
-  composeDateLine,
+  drawAlignedText,
   drawCertificateLogo,
+  drawDateAndLocation,
   drawSignature,
   drawText,
   drawWrappedText,
@@ -41,21 +42,27 @@ export const modernStyle = {
     )
     const headerWidth = Math.max(80, PAGE_WIDTH - 30 - headerLeft)
 
-    drawText(doc, options.title, headerLeft, 54, {
+    drawAlignedText(doc, options.title, 54, {
+      alignment: options.titleAlign,
+      fallback: 'left',
+      left: headerLeft,
+      right: PAGE_WIDTH - 30,
       size: scale(32, 'titleSize'),
       font: resolveTextFont(options.titleFont, 'helvetica'),
       style: 'bold',
       color: NAVY,
-      align: 'left',
       maxWidth: headerWidth,
     })
 
-    drawText(doc, options.subtitle, headerLeft, 62, {
+    drawAlignedText(doc, options.subtitle, 62, {
+      alignment: options.subtitleAlign,
+      fallback: 'left',
+      left: headerLeft,
+      right: PAGE_WIDTH - 30,
       size: scale(9, 'subtitleSize'),
       font: resolveTextFont(options.subtitleFont, 'helvetica'),
       style: 'bold',
       color: TEAL,
-      align: 'left',
       charSpace: scale(2.2, 'subtitleSize'),
       maxWidth: headerWidth,
     })
@@ -110,15 +117,16 @@ export const modernStyle = {
     })
 
     const dateY = bodyEnd + 5.5
-    drawText(doc, composeDateLine(options), PAGE_WIDTH - 30, dateY, {
+    const dateBox = drawDateAndLocation(doc, options, {
+      y: dateY,
       size: scale(8.6, 'dateSize'),
       font: 'helvetica',
+      style: 'normal',
       color: GRAY,
       align: 'right',
-      maxWidth: 120,
     })
 
-    const signatureY = Math.max(SIGNATURE_BASELINE_Y, dateY + 10)
+    const signatureY = Math.max(SIGNATURE_BASELINE_Y, dateBox.endY + 10)
 
     drawSignature(doc, {
       centerX: 66,

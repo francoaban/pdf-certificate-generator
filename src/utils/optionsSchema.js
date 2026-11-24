@@ -1,3 +1,4 @@
+import { TEXT_ALIGNMENT_IDS } from '../certificates/alignment.js'
 import {
   DEFAULT_OPTIONS,
   FONT_SIZE_MAX,
@@ -306,6 +307,21 @@ export function normalizeOptions(input, { strict = false } = {}) {
     strict,
     warnings,
   )
+  for (const field of [
+    'titleAlign',
+    'subtitleAlign',
+    'locationAlign',
+    'dateAlign',
+  ]) {
+    options[field] = normalizeEnum(
+      merged[field],
+      field,
+      TEXT_ALIGNMENT_IDS,
+      DEFAULT_OPTIONS[field],
+      strict,
+      warnings,
+    )
+  }
   options.nameFont = normalizeEnum(
     merged.nameFont,
     'nameFont',

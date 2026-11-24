@@ -2,13 +2,14 @@ import { resolveNameFont, resolveTextFont } from '../fonts.js'
 import {
   PAGE_WIDTH,
   SIGNATURE_BASELINE_Y,
-  composeDateLine,
+  drawAlignedText,
   drawCenteredText,
   drawCertificateLogo,
+  drawDateAndLocation,
   drawDiamond,
   drawSignature,
-  drawText,
   drawWrappedText,
+  getSafeTextLeft,
   scaleFont,
 } from '../shared.js'
 
@@ -35,9 +36,18 @@ export const botanicalStyle = {
     const centerX = PAGE_WIDTH / 2
     const scale = (value, field) => scaleFont(value, options, field)
 
-    drawCertificateLogo(doc, logo)
+    const logoBox = drawCertificateLogo(doc, logo)
+    const titleRight = centerX + 125
+    const titleLeft = getSafeTextLeft(logoBox, centerX - 125, titleRight)
+    const subtitleRight = centerX + 120
+    const subtitleLeft = getSafeTextLeft(logoBox, centerX - 120, subtitleRight)
 
-    drawCenteredText(doc, options.title, 52, {
+    drawAlignedText(doc, options.title, 52, {
+      alignment: options.titleAlign,
+      fallback: 'center',
+      left: titleLeft,
+      right: titleRight,
+      center: centerX,
       size: scale(30, 'titleSize'),
       font: resolveTextFont(options.titleFont, 'times'),
       style: 'bold',
@@ -46,7 +56,12 @@ export const botanicalStyle = {
       maxWidth: 250,
     })
 
-    drawCenteredText(doc, options.subtitle, 60.5, {
+    drawAlignedText(doc, options.subtitle, 60.5, {
+      alignment: options.subtitleAlign,
+      fallback: 'center',
+      left: subtitleLeft,
+      right: subtitleRight,
+      center: centerX,
       size: scale(9, 'subtitleSize'),
       font: resolveTextFont(options.subtitleFont, 'helvetica'),
       color: SAGE,
@@ -102,16 +117,16 @@ export const botanicalStyle = {
     })
 
     const dateY = bodyEnd + 5.5
-    drawText(doc, composeDateLine(options), PAGE_WIDTH - 30, dateY, {
+    const dateBox = drawDateAndLocation(doc, options, {
+      y: dateY,
       size: scale(9, 'dateSize'),
       font: 'times',
       style: 'italic',
       color: SAGE,
       align: 'right',
-      maxWidth: 120,
     })
 
-    const signatureY = Math.max(SIGNATURE_BASELINE_Y, dateY + 10)
+    const signatureY = Math.max(SIGNATURE_BASELINE_Y, dateBox.endY + 10)
 
     drawSignature(doc, {
       centerX: 80,
