@@ -16,7 +16,8 @@ test('backgrounds: presets include the generic, floral and style backgrounds', (
   assert.equal(new Set(sources).size, sources.length)
 
   const floral = BACKGROUND_PRESETS.find((preset) => preset.id === 'rojo-floral')
-  assert.equal(floral.recolor, 'bitmap')
+  assert.equal(floral.src, 'backgrounds/rojo-floral.svg')
+  assert.equal(floral.recolor, undefined)
   assert.equal(floral.primaryOnly, true)
   assert.match(floral.palette.primary, /^#[0-9a-f]{6}$/)
 

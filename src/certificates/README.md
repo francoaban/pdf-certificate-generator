@@ -78,13 +78,14 @@ Textos**.
 
 Los fondos viven en `public/backgrounds/` y las fuentes en `public/fonts/`. El
 selector de fondos muestra una galería con `backgrounds/generico.svg`,
-`backgrounds/rojo-floral.png` y los fondos de los cuatro estilos; también
+`backgrounds/rojo-floral.svg` y los fondos de los cuatro estilos; también
 permite elegir `cover` o `contain` como ajuste, personalizar el color principal
 del fondo floral y los colores principal y secundario de los detalles
 decorativos de los SVG. El papel y los textos mantienen sus colores para
-conservar el contraste. En el fondo floral solo se recolorean los trazos rojos;
-el papel blanco y el resto del diseño se conservan. Las fuentes están
-incluidas en el precache de la PWA para que la app funcione offline.
+conservar el contraste. En el fondo floral se recolorean los seis niveles de
+tinta como variantes del color principal; el papel blanco y el resto del
+diseño se conservan. Las fuentes están incluidas en el precache de la PWA para
+que la app funcione offline.
 
 ## Agregar o personalizar un estilo
 
@@ -120,8 +121,8 @@ Los colores decorativos se controlan con `options.primaryColor` y
 `options.secondaryColor` (hexadecimales). Si quedan en `null`, se usa la paleta
 del fondo activo definida en `BACKGROUND_PALETTES`. La personalización se aplica
 a los SVG de `public/backgrounds/`; en el fondo floral, `primaryColor` recolorea
-sus trazos rojos. Las imágenes subidas o remotas conservan sus colores. El
-reemplazo de colores y el recoloreado del floral están en
+sus trazos y sus niveles de tinta. Las imágenes subidas o remotas conservan sus
+colores. El reemplazo de colores y las variantes del floral están en
 `src/utils/backgroundColors.js`; la carga con colores en
 `src/utils/backgroundLoader.js`.
 

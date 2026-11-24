@@ -5,7 +5,6 @@ import {
   colorizeBackgroundSvg,
   getBackgroundPalette,
   mixColor,
-  recolorFloralPixels,
 } from './backgroundColors.js'
 
 test('background colors: replaces decorative colors and keeps the paper', () => {
@@ -49,20 +48,34 @@ test('background colors: mixes colors towards a target', () => {
   assert.equal(mixColor('#ff0000', '#000000', 1), '#000000')
 })
 
-test('background colors: recolors red floral pixels and keeps white paper', () => {
-  const data = new Uint8ClampedArray([
-    168, 56, 55, 255, // rojo del fondo floral
-    255, 255, 255, 255, // papel blanco
-    32, 120, 80, 255, // otro color decorativo
-    0, 0, 0, 0, // píxel transparente
-    255, 253, 253, 255, // ruido casi blanco
-  ])
+test('background colors: recolors floral bands and keeps white paper', () => {
+  const svg =
+    '<rect fill="#fff"/><path fill="#f8eeee"/><path fill="#be6a69"/><path fill="#a83837"/>'
+  const colorized = colorizeBackgroundSvg(
+    svg,
+    'rojo-floral',
+    '#2563eb',
+    null,
+  )
 
-  recolorFloralPixels(data, '#2563eb')
+  assert.match(colorized, /#2563eb/)
+  assert.match(colorized, new RegExp(mixColor('#2563eb', '#ffffff', 0.25)))
+  assert.match(colorized, new RegExp(mixColor('#2563eb', '#ffffff', 0.915)))
+  assert.match(colorized, /#fff/)
+  assert.doesNotMatch(colorized, /#a83837|#be6a69|#f8eeee/)
+})
 
-  assert.ok(data[2] > data[0], 'el rojo debe convertirse en azul')
-  assert.deepEqual([...data.slice(4, 7)], [255, 255, 255])
-  assert.deepEqual([...data.slice(8, 11)], [32, 120, 80])
-  assert.deepEqual([...data.slice(12, 15)], [0, 0, 0])
-  assert.deepEqual([...data.slice(16, 19)], [255, 253, 253])
+test('background colors: floral palette keeps exact tinted bands by default', () => {
+  const svg =
+    '<path fill="#f8eeee"/><path fill="#be6a69"/><path fill="#a83837"/>'
+  const colorized = colorizeBackgroundSvg(
+    svg,
+    'rojo-floral',
+    BACKGROUND_PALETTES['rojo-floral'].primary,
+    null,
+  )
+
+  assert.match(colorized, /#f8eeee/)
+  assert.match(colorized, /#be6a69/)
+  assert.match(colorized, /#a83837/)
 })
