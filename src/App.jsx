@@ -4,6 +4,7 @@ import DataTable from './features/records/components/DataTable'
 import SettingsPanel from './features/settings/SettingsPanel'
 import CertificatePreview from './features/certificates/components/CertificatePreview'
 import UpdatePrompt from './components/UpdatePrompt'
+import Footer from './components/Footer'
 import { computeIssues } from './utils/issues'
 import useInstallPrompt from './hooks/useInstallPrompt'
 import useWorkbook from './features/import/hooks/useWorkbook'
@@ -344,6 +345,8 @@ export default function App() {
             <CertificatePreview record={previewRecord} options={previewOptions} />
           </aside>
         </div>
+
+        <Footer />
       </div>
     </div>
   )
