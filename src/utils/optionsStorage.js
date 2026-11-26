@@ -8,6 +8,7 @@ const STORE_NAME = 'settings'
 const ASSETS_KEY = 'options-assets'
 const ASSET_FIELDS = [
   'customLogo',
+  'watermarkImage',
   'imageBackground',
   'background',
   'signatureLeftImage',

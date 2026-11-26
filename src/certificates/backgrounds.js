@@ -27,3 +27,23 @@ export const BACKGROUND_PRESETS = [
     palette: BACKGROUND_PALETTES[id] || null,
   })),
 ]
+
+// Fuentes antiguas que deben seguir resolviendo al preset actual.
+const LEGACY_PRESET_SOURCES = new Map([
+  ['backgrounds/rojo-floral.png', 'rojo-floral'],
+])
+
+/** Devuelve el preset que corresponde a una fuente guardada, incluidos los alias antiguos. */
+export function findBackgroundPreset(source) {
+  const normalized =
+    typeof source === 'string' ? source.replace(/^\.?\//, '') : null
+  if (!normalized) return null
+
+  const legacyId = LEGACY_PRESET_SOURCES.get(normalized.toLowerCase())
+  return (
+    BACKGROUND_PRESETS.find(
+      (preset) =>
+        preset.src === normalized || (legacyId && preset.id === legacyId),
+    ) || null
+  )
+}

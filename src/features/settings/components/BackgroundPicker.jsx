@@ -1,5 +1,8 @@
 import { useId, useRef, useState } from 'react'
-import { BACKGROUND_PRESETS } from '../../../certificates/backgrounds'
+import {
+  BACKGROUND_PRESETS,
+  findBackgroundPreset,
+} from '../../../certificates/backgrounds'
 import { publicUrl } from '../../../certificates/shared'
 import { isRemoteAsset } from '../../../utils/optionsSchema'
 import { DEFAULT_BACKGROUND_URL, processBackgroundFile } from '../../../utils/background'
@@ -23,19 +26,11 @@ export default function BackgroundPicker({
   const secondaryColorId = useId()
   const secondaryColorHintId = `${secondaryColorId}-hint`
 
-  const normalizeSource = (value) =>
-    typeof value === 'string' ? value.replace(/^\.?\//, '') : null
   const custom = options.imageBackground
   const customSrc = typeof custom === 'string' ? custom : custom?.dataUrl
-  const selectedPreset = BACKGROUND_PRESETS.find(
-    (preset) => preset.src === normalizeSource(customSrc),
-  )
-  const configuredPreset = BACKGROUND_PRESETS.find(
-    (preset) => preset.src === normalizeSource(options.background),
-  )
-  const stylePreset = BACKGROUND_PRESETS.find(
-    (preset) => preset.src === normalizeSource(defaultBackground),
-  )
+  const selectedPreset = findBackgroundPreset(customSrc)
+  const configuredPreset = findBackgroundPreset(options.background)
+  const stylePreset = findBackgroundPreset(defaultBackground)
   const activePreset =
     customSrc && options.showImageBackground
       ? selectedPreset
@@ -59,7 +54,13 @@ export default function BackgroundPicker({
         : 'Imagen personalizada'
       : '')
   const previewSrc = publicUrl(
-    customSrc || options.background || defaultBackground || DEFAULT_BACKGROUND_URL,
+    selectedPreset?.src ||
+      customSrc ||
+      configuredPreset?.src ||
+      options.background ||
+      stylePreset?.src ||
+      defaultBackground ||
+      DEFAULT_BACKGROUND_URL,
   )
   const customEnabled = Boolean(customSrc)
 
@@ -109,8 +110,8 @@ export default function BackgroundPicker({
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-4">
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-start gap-4">
         <div
           className={`flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-1 ${
             customEnabled && !options.showImageBackground ? 'opacity-40' : ''
@@ -162,7 +163,7 @@ export default function BackgroundPicker({
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={busy}
-              className="rounded-lg border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-50 disabled:cursor-wait disabled:opacity-60"
+              className="inline-flex min-h-10 items-center justify-center rounded-lg border border-indigo-200 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 disabled:cursor-wait disabled:opacity-60"
             >
               {busy ? 'Cargando…' : customSrc ? 'Cambiar fondo…' : 'Elegir fondo…'}
             </button>
@@ -170,7 +171,7 @@ export default function BackgroundPicker({
               <button
                 type="button"
                 onClick={clear}
-                className="text-xs font-semibold text-slate-500 hover:text-slate-700"
+                className="inline-flex min-h-10 items-center rounded-lg px-2 text-xs font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200"
               >
                 Usar fondo del estilo
               </button>
@@ -190,42 +191,53 @@ export default function BackgroundPicker({
         }}
       />
 
-      <div className="space-y-2 border-t border-slate-100 pt-3">
-        <div className="flex items-center gap-1.5">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-            Fondos predeterminados
-          </p>
-          <InfoTip text="Elegí un fondo de la galería. Los fondos vectoriales permiten personalizar sus colores; el floral permite cambiar su color principal." />
+      <details className="border-t border-slate-100 pt-2">
+        <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 rounded-lg px-1 text-sm font-semibold text-slate-700 transition hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 [&::-webkit-details-marker]:hidden">
+          <span>Fondos predeterminados</span>
+          <span className="flex min-w-0 items-center gap-2 text-xs font-medium text-slate-500">
+            <span className="truncate">
+              {activePreset?.label || 'Explorar galería'}
+            </span>
+            <span aria-hidden="true">⌄</span>
+          </span>
+        </summary>
+        <div className="space-y-2 pt-2">
+          <div className="flex items-center gap-1.5">
+            <p className="text-xs text-slate-500">Elegí un fondo de la galería</p>
+            <InfoTip text="Los fondos vectoriales permiten personalizar sus colores; el floral permite cambiar su color principal." />
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {BACKGROUND_PRESETS.map((preset) => {
+              const active = selectedPreset?.id === preset.id
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => applyPreset(preset)}
+                  aria-pressed={active}
+                  className={`overflow-hidden rounded-lg border text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 ${
+                    active
+                      ? 'border-indigo-400 ring-2 ring-indigo-100'
+                      : 'border-slate-200 hover:border-indigo-300'
+                  }`}
+                >
+                  <img
+                    src={publicUrl(preset.src)}
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                    decoding="async"
+                    className="aspect-[297/210] w-full object-cover"
+                  />
+                  <span className="block truncate px-2 py-1 text-[11px] font-medium text-slate-600">
+                    {preset.label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {BACKGROUND_PRESETS.map((preset) => {
-            const active = normalizeSource(customSrc) === preset.src
-            return (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => applyPreset(preset)}
-                aria-pressed={active}
-                className={`overflow-hidden rounded-lg border text-left transition ${
-                  active
-                    ? 'border-indigo-400 ring-2 ring-indigo-100'
-                    : 'border-slate-200 hover:border-indigo-300'
-                }`}
-              >
-                <img
-                  src={publicUrl(preset.src)}
-                  alt=""
-                  aria-hidden="true"
-                  className="aspect-[297/210] w-full object-cover"
-                />
-                <span className="block truncate px-2 py-1 text-[11px] font-medium text-slate-600">
-                  {preset.label}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      </details>
 
       <div className="space-y-1 border-t border-slate-100 pt-3">
         <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
@@ -250,78 +262,95 @@ export default function BackgroundPicker({
         Las imágenes conservan su proporción y se centran automáticamente.
       </p>
 
-      <div className="space-y-2 border-t border-slate-100 pt-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Colores del fondo
-            </p>
-            <InfoTip text="Se aplican solo a los fondos vectoriales predeterminados. El papel y los textos conservan su contraste." />
+      <details className="border-t border-slate-100 pt-2">
+        <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 rounded-lg px-1 text-sm font-semibold text-slate-700 transition hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 [&::-webkit-details-marker]:hidden">
+          <span>Colores del fondo</span>
+          <span className="flex items-center gap-2 text-xs font-medium text-slate-500">
+            <span>{colorizable ? 'Personalizables' : 'Según el fondo'}</span>
+            <span aria-hidden="true">⌄</span>
+          </span>
+        </summary>
+        <div className="space-y-2 pt-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs text-slate-500">
+                Colores decorativos del fondo
+              </p>
+              <InfoTip text="Se aplican solo a los fondos vectoriales predeterminados. El papel y los textos conservan su contraste." />
+            </div>
+            {hasCustomColors && (
+              <button
+                type="button"
+                onClick={resetColors}
+                className="inline-flex min-h-10 shrink-0 items-center rounded-lg px-2 text-xs font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200"
+              >
+                Usar colores originales
+              </button>
+            )}
           </div>
-          {hasCustomColors && (
-            <button
-              type="button"
-              onClick={resetColors}
-              className="text-[11px] font-semibold text-slate-500 hover:text-slate-700"
-            >
-              Usar colores originales
-            </button>
-          )}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                <label htmlFor={primaryColorId}>Principal</label>
+                <InfoTip
+                  text="Color decorativo principal del fondo vectorial."
+                  id={primaryColorHintId}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  id={primaryColorId}
+                  type="color"
+                  value={primaryValue}
+                  onChange={(e) =>
+                    onChange({ ...options, primaryColor: e.target.value })
+                  }
+                  disabled={!colorizable}
+                  aria-describedby={primaryColorHintId}
+                  className="h-8 w-10 cursor-pointer rounded border border-slate-200 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-40"
+                />
+                <span className="font-mono text-[11px] text-slate-500">
+                  {primaryValue}
+                </span>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                <label htmlFor={secondaryColorId}>Secundario</label>
+                <InfoTip
+                  text="Color decorativo secundario. En el fondo floral se usa el mismo color principal."
+                  id={secondaryColorHintId}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  id={secondaryColorId}
+                  type="color"
+                  value={secondaryValue}
+                  onChange={(e) =>
+                    onChange({ ...options, secondaryColor: e.target.value })
+                  }
+                  disabled={!secondaryColorizable}
+                  aria-describedby={secondaryColorHintId}
+                  className="h-8 w-10 cursor-pointer rounded border border-slate-200 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-40"
+                />
+                <span className="font-mono text-[11px] text-slate-500">
+                  {secondaryValue}
+                </span>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-slate-400">
+            {activePreset?.primaryOnly
+              ? 'El fondo floral permite personalizar su color principal; el papel y el diseño se conservan.'
+              : colorizable
+                ? 'Se aplican a los fondos vectoriales predeterminados; el papel y los textos mantienen su contraste.'
+                : activePreset
+                  ? 'Este fondo es una imagen fija y conserva sus colores originales.'
+                  : 'Disponibles para fondos predeterminados. Una imagen subida conserva sus colores originales.'}
+          </p>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
-              <label htmlFor={primaryColorId}>Principal</label>
-              <InfoTip
-                text="Color decorativo principal del fondo vectorial."
-                id={primaryColorHintId}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                id={primaryColorId}
-                type="color"
-                value={primaryValue}
-                onChange={(e) => onChange({ ...options, primaryColor: e.target.value })}
-                disabled={!colorizable}
-                aria-describedby={primaryColorHintId}
-                className="h-8 w-10 cursor-pointer rounded border border-slate-200 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-40"
-              />
-              <span className="font-mono text-[11px] text-slate-500">{primaryValue}</span>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
-              <label htmlFor={secondaryColorId}>Secundario</label>
-              <InfoTip
-                text="Color decorativo secundario. En el fondo floral se usa el mismo color principal."
-                id={secondaryColorHintId}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                id={secondaryColorId}
-                type="color"
-                value={secondaryValue}
-                onChange={(e) => onChange({ ...options, secondaryColor: e.target.value })}
-                disabled={!secondaryColorizable}
-                aria-describedby={secondaryColorHintId}
-                className="h-8 w-10 cursor-pointer rounded border border-slate-200 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-40"
-              />
-              <span className="font-mono text-[11px] text-slate-500">{secondaryValue}</span>
-            </div>
-          </div>
-        </div>
-        <p className="text-xs text-slate-400">
-          {activePreset?.primaryOnly
-            ? 'El fondo floral permite personalizar su color principal; el papel y el diseño se conservan.'
-            : colorizable
-              ? 'Se aplican a los fondos vectoriales predeterminados; el papel y los textos mantienen su contraste.'
-              : activePreset
-                ? 'Este fondo es una imagen fija y conserva sus colores originales.'
-                : 'Disponibles para fondos predeterminados. Una imagen subida conserva sus colores originales.'}
-        </p>
-      </div>
+      </details>
 
       {isRemoteAsset(custom) && (
         <p role="status" className="text-xs text-amber-700">

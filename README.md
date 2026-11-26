@@ -1,6 +1,9 @@
 # Generador de certificados
 
-Aplicación web para generar certificados PDF a partir de planillas Excel o CSV.
+Aplicación web progresiva (PWA) para generar certificados PDF por lote desde
+planillas Excel o CSV. Procesa los datos localmente, permite exportar PDFs y ZIPs
+y también ofrece una versión de escritorio para Windows con Electron. Después de
+la carga inicial, puede usarse sin conexión.
 
 ## Organización del código
 
@@ -30,14 +33,19 @@ Las firmas pueden llevar imágenes PNG transparentes, y el nombre puede usar la
 caligrafía del estilo o una fuente elegida entre Great Vibes, Parisienne,
 Pinyon Script, Sacramento, serif o sans. El título, el subtítulo y el cuerpo
 tienen selección de tipografía independiente, y cualquier texto acepta
-`**texto**` para negrita. Cada texto del certificado —título, subtítulo, texto
+`**texto**` para negrita, `*texto*` para cursiva y `***texto***` para ambas. La
+cursiva se aplica con las fuentes Serif y Sans; las caligráficas conservan su
+estilo. Cada texto del certificado —título, subtítulo, texto
 previo, nombre, documento, cuerpo, fecha y firmas— tiene su propio tamaño, con
 un campo numérico de 80 % a 150 % que permite ajustar el porcentaje de a uno.
 La fecha y la ubicación se muestran debajo
-del cuerpo, alineadas a la derecha; el logo se ubica arriba a la izquierda con
-un alto del 30 % de la hoja. Al cargar un logo personalizado se
+del cuerpo con alineación configurable; el logo se ubica arriba a la izquierda
+con un alto del 30 % de la hoja. Al cargar un logo personalizado se
 puede activar **«Generar fondo con el logo»**, que agrega una marca de agua
-centrada de hasta un tercio del ancho de la hoja. Las opciones se pueden
+centrada de hasta un tercio del ancho de la hoja. En la misma sección se puede
+subir **otra imagen personalizada** para el fondo, con el mismo tamaño, posición
+y opacidad. Solo una de las dos marcas de agua puede estar activa; también se
+pueden dejar las dos desactivadas. Las opciones se pueden
 importar/exportar como JSON para compartirlas entre dispositivos o
 instalaciones. La configuración importada se valida antes de aplicarse.
 
@@ -133,8 +141,13 @@ para usar la aplicación ya compilada e instalada.
 ## Comandos
 
 ```sh
-pnpm build    # Genera la versión de producción en dist/
-pnpm preview  # Sirve localmente la versión de producción
-pnpm lint     # Ejecuta ESLint
-pnpm test     # Ejecuta las pruebas con Vitest
+pnpm build        # Genera la versión de producción en dist/
+pnpm preview      # Sirve localmente la versión de producción
+pnpm lint         # Ejecuta ESLint
+pnpm test         # Ejecuta las pruebas con Vitest
+pnpm optimize:svg # Optimiza los SVG de public/ y src/assets con SVGO
 ```
+
+## Licencia
+
+MIT. Ver [LICENSE](./LICENSE).

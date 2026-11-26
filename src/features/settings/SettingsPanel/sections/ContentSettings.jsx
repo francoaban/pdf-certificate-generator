@@ -7,8 +7,12 @@ export default function ContentSettings({ options, onChange, set }) {
   return (
     <>
       <p className="rounded-lg bg-indigo-50 px-3 py-2 text-xs text-indigo-700">
-        Podés usar <code className="font-mono font-semibold">**texto**</code> en
-        cualquier campo para aplicar negrita.
+        Podés usar <code className="font-mono font-semibold">**texto**</code> para
+        negrita, <code className="font-mono font-semibold">*texto*</code> para
+        cursiva y{' '}
+        <code className="font-mono font-semibold">***texto***</code> para ambas.
+        La cursiva se aplica con las fuentes Serif y Sans; las caligráficas
+        conservan su estilo.
       </p>
       <p className="text-xs text-slate-500">
         Cada texto tiene su propio tamaño. Ajustá el porcentaje debajo de cada
@@ -19,7 +23,7 @@ export default function ContentSettings({ options, onChange, set }) {
         <div className="space-y-3 p-3">
           <Field
             label="Título"
-            hint="Es el encabezado principal del certificado. Podés usar **texto** para negrita."
+            hint="Es el encabezado principal del certificado. Admite **negrita**, *cursiva* y ***ambas***."
           >
             <input
               className={inputClass}
@@ -61,7 +65,7 @@ export default function ContentSettings({ options, onChange, set }) {
         <div className="space-y-3 p-3">
           <Field
             label="Subtítulo"
-            hint="Texto secundario que acompaña al título. También admite **negrita**."
+            hint="Texto secundario que acompaña al título. Admite **negrita**, *cursiva* y ***ambas***."
           >
             <input
               className={inputClass}
@@ -104,7 +108,7 @@ export default function ContentSettings({ options, onChange, set }) {
       <div className="grid gap-3 sm:grid-cols-[1fr_180px] sm:items-end">
         <Field
           label="Texto previo al nombre"
-          hint="Frase que introduce el nombre del participante, por ejemplo «Se otorga el presente certificado a»."
+          hint="Frase que introduce el nombre del participante, por ejemplo «Se otorga el presente certificado a». Admite **negrita**, *cursiva* y ***ambas***."
         >
           <input
             className={inputClass}
@@ -124,7 +128,7 @@ export default function ContentSettings({ options, onChange, set }) {
       <div className="space-y-3">
         <Field
           label="Cuerpo del certificado"
-          hint="Texto descriptivo del certificado. Podés resaltar una parte con **texto**."
+          hint="Texto descriptivo del certificado. Podés resaltar una parte con **negrita**, *cursiva* o ***ambas***."
         >
           <textarea
             rows={3}
@@ -159,7 +163,10 @@ export default function ContentSettings({ options, onChange, set }) {
         <p className="text-xs text-slate-400">
           Para destacar solo el final del cuerpo, escribí por ejemplo:
           «...su dedicación.{' '}
-          <span className="font-semibold">**Gracias por participar.**</span>»
+          <span className="font-semibold">**Gracias por participar.**</span>»{' '}
+          También podés usar{' '}
+          <code className="font-mono font-semibold">*cursiva*</code> o{' '}
+          <code className="font-mono font-semibold">***negrita y cursiva***</code>.
         </p>
       </div>
     </>

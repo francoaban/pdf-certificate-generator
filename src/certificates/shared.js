@@ -10,7 +10,7 @@ import {
   SYNTHETIC_BOLD_OFFSET,
   drawRichText,
   drawRichWrappedText,
-  hasBoldMarkup,
+  hasRichTextMarkup,
   needsSyntheticBold,
   safeFontStyle,
 } from '../utils/richText.js'
@@ -196,7 +196,7 @@ export function drawText(
 ) {
   if (text === undefined || text === null || text === '') return size
 
-  if (hasBoldMarkup(text)) {
+  if (hasRichTextMarkup(text)) {
     return drawRichText(doc, text, x, y, {
       size,
       font,
@@ -308,8 +308,7 @@ export function getSafeTextLeft(
 }
 
 /**
- * Dibuja ubicación y fecha. Si comparten alineación se muestran en una sola
- * línea separadas por «·»; si no, cada una ocupa su propia línea.
+ * Dibuja ubicación y fecha en una sola línea, con una alineación compartida.
  */
 export function drawDateAndLocation(
   doc,
@@ -324,36 +323,25 @@ export function drawDateAndLocation(
     left = 30,
     right = PAGE_WIDTH - 30,
     maxWidth = 120,
-    lineHeight = 1.35,
   } = {},
 ) {
   const location = composePlaceLine(options)
   const date = composeDateValue(options)
-  const locationAlign = resolveAlignment(options.locationAlign, align)
-  const dateAlign = resolveAlignment(options.dateAlign, align)
-  const lineStep = size * 0.352778 * lineHeight
+  const alignment = resolveAlignment(options.dateLocationAlign, align)
+  const combined = [location, date].filter(Boolean).join(' · ')
 
-  const drawLine = (text, lineY, alignment) =>
-    drawAlignedText(doc, text, lineY, {
-      alignment,
-      left,
-      right,
-      size,
-      font,
-      style,
-      color,
-      maxWidth,
-    })
+  drawAlignedText(doc, combined, y, {
+    alignment,
+    left,
+    right,
+    size,
+    font,
+    style,
+    color,
+    maxWidth,
+  })
 
-  if (!location || locationAlign === dateAlign) {
-    const combined = [location, date].filter(Boolean).join(' · ')
-    drawLine(combined, y, location ? locationAlign : dateAlign)
-    return { endY: y, lines: 1 }
-  }
-
-  drawLine(location, y, locationAlign)
-  drawLine(date, y + lineStep, dateAlign)
-  return { endY: y + lineStep, lines: 2 }
+  return { endY: y, lines: 1 }
 }
 
 /** Texto multilínea con ajuste automático. */
@@ -375,7 +363,7 @@ export function drawWrappedText(
 ) {
   if (!text) return y
 
-  if (hasBoldMarkup(text)) {
+  if (hasRichTextMarkup(text)) {
     return drawRichWrappedText(doc, text, x, y, {
       width,
       size,
@@ -478,7 +466,7 @@ export function drawCertificateLogo(doc, logo) {
   return drawLogo(doc, logo, {
     align: 'left',
     x: 14,
-    top: 10,
+    top: 12,
     maxWidth: PAGE_WIDTH - 28,
     maxHeight: PAGE_HEIGHT * LOGO_HEIGHT_RATIO,
   })

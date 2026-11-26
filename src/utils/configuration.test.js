@@ -69,6 +69,21 @@ test('rejects an unknown style and keeps known options only', async () => {
   assert.equal(Object.hasOwn(options, 'extra'), false)
 })
 
+test('imports an uploaded watermark asset', async () => {
+  const options = await readConfiguration(
+    jsonFile({
+      watermarkImage: {
+        dataUrl: 'data:image/png;base64,AAAA',
+        ratio: 1,
+        name: 'marca.png',
+      },
+      showWatermarkImage: true,
+    }),
+  )
+  assert.equal(options.watermarkImage.name, 'marca.png')
+  assert.equal(options.showWatermarkImage, true)
+})
+
 test('imports an uploaded background asset', async () => {
   const options = await readConfiguration(
     jsonFile({

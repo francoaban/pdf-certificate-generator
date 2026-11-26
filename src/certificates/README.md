@@ -50,27 +50,27 @@ defecto). Si se desactiva, el documento sigue disponible para la tabla y el
 nombre de archivo, pero no se dibuja en el certificado. `options.docDots`
 mantiene o quita los separadores de miles.
 
-Los textos aceptan marcadores `**texto**` para negrita, incluso en una parte del
-cuerpo (`... su dedicación. **Gracias por participar.**`). Las fuentes del
-título, subtítulo y cuerpo se eligen de forma independiente con
+Los textos aceptan marcadores `**texto**` para negrita, `*texto*` para cursiva y
+`***texto***` para ambas, incluso en una parte del cuerpo (`... su dedicación.
+**Gracias por participar.**`). La cursiva se aplica con las fuentes estándar
+(Serif y Sans); las TTF personalizadas conservan su estilo normal. Las fuentes
+del título, subtítulo y cuerpo se eligen de forma independiente con
 `options.titleFont`, `options.subtitleFont` y `options.bodyFont`; `auto`
 conserva la tipografía de cada estilo. Cada texto se escala por separado con
 `options.titleSize`, `subtitleSize`, `preTextSize`, `nameSize`, `bodySize`,
 `dateSize`, `signatureSize` y `documentSize` (100 por defecto, entre 80 y 150).
-La alineación de título, subtítulo, ubicación y fecha se controla con
-`options.titleAlign`, `subtitleAlign`, `locationAlign` y `dateAlign`
-(`auto`, `left`, `center` o `right`). `auto` conserva la composición del estilo:
-centrada en clásico, elegante y botánico, y a la izquierda en moderno. Las
-alineaciones a la izquierda reservan el espacio ocupado por el logo para evitar
-superposiciones. Si la ubicación y la fecha comparten alineación se dibujan en
-una sola línea; si no, cada una ocupa su propia línea. Por defecto, la fecha y
-la ubicación se dibujan debajo del cuerpo y alineadas a la derecha. El logo se
-ubica arriba a la izquierda con una altura del 30 % de la hoja y ancho
-proporcional.
+La alineación de título y subtítulo se controla con `options.titleAlign` y
+`options.subtitleAlign`; `auto` conserva la composición del estilo: centrada en
+clásico, elegante y botánico, y a la izquierda en moderno cuando hay logo (se
+centra sin logo). Las alineaciones a la izquierda reservan el espacio ocupado por
+el logo para evitar superposiciones. La fecha y la ubicación comparten una única
+alineación en `options.dateLocationAlign` (`auto`, `left`, `center` o `right`) y
+siempre se dibujan juntas en una sola línea, separadas por «·». Por defecto, se
+dibujan debajo del cuerpo y alineadas a la derecha. El logo se ubica arriba a la
+izquierda con una altura del 30 % de la hoja y ancho proporcional.
 
 En la interfaz, el estilo se elige en **Configuración → Diseño → Estilo del
-certificado** y los tamaños de cada texto en **Configuración → Personalizar
-Textos**.
+certificado** y los tamaños de cada texto en **Configuración → Contenido**.
 
 ## Cómo funciona
 
@@ -93,6 +93,10 @@ conservar el contraste. En el fondo floral se recolorean los seis niveles de
 tinta como variantes del color principal; el papel blanco y el resto del
 diseño se conservan. Las fuentes están incluidas en el precache de la PWA para
 que la app funcione offline.
+
+Los fondos SVG, el favicon y el logo genérico se optimizan con
+`pnpm optimize:svg`. La configuración de SVGO conserva dimensiones, `viewBox` y
+colores exactos que usa el recoloreado.
 
 ## Agregar o personalizar un estilo
 
@@ -136,8 +140,11 @@ colores. El reemplazo de colores y las variantes del floral están en
 Con un logo personalizado, `options.backgroundFromLogo = true` dibuja una marca
 de agua centrada sobre el fondo. El logo ocupa hasta un tercio del ancho de la
 hoja y se limita en alto para no invadir los textos; el cálculo está en
-`src/utils/backgroundLogo.js`. La marca de agua se repite en cada página del PDF
-combinado.
+`src/utils/backgroundLogo.js`. `options.watermarkImage` permite una imagen
+alternativa con las mismas reglas; se muestra si `showWatermarkImage` es
+verdadero. `backgroundFromLogo` y `showWatermarkImage` son excluyentes: si
+ambas llegan activas, el PDF usa solo la imagen personalizada. La marca de agua
+activa se repite en cada página del PDF combinado.
 
 La línea de lugar y fecha usa `city` (o `location` en integraciones directas),
 `province` y `country` según sus opciones `showCity`, `showProvince` y

@@ -58,8 +58,6 @@ El plan cubre cuatro frentes:
 - Galería de fondos cargando assets completos.
 - ZIP generado completamente en memoria.
 - Fuentes TTF completas embebidas en cada PDF.
-- `src/assets/escudo.png` pesa 1,4 MB y no está referenciado en el código.
-
 ---
 
 ## 3. Decisiones pendientes antes de implementar
@@ -68,10 +66,10 @@ El plan cubre cuatro frentes:
 |---|---|---|
 | 1 | Rama base | Usar `master`, que contiene el código actual. `origin/main` está en el commit inicial. Confirmar si luego se actualiza `main`. |
 | 2 | Alcance de alineación de fecha y ubicación | Cuatro controles (`locationAlign`, `dateAlign`) con `auto`; si las alineaciones difieren, mostrar dos líneas. |
-| 3 | Alcance de conversión SVG | Convertir primero `rojo-floral.png` y `logo-generico.png`. Dejar `escudo.png` para una decisión aparte. |
+| 3 | Alcance de conversión SVG | `rojo-floral.svg` reemplaza al PNG; el PNG se eliminó tras comparar ambos al mismo tamaño y queda disponible en el historial de Git. |
 | 4 | SVG subidos por usuarios | No aceptarlos por ahora: requieren sanitización y jsPDF los rasteriza igual. |
-| 5 | Archivo `escudo.png` | Confirmar si se elimina, se reemplaza por un vector oficial o se conserva como respaldo. |
-| 6 | `certificado-ejemplo.svg` | Confirmar si se documenta, se usa o se elimina. Hoy no tiene referencias. |
+| 5 | Archivo `escudo.png` | Eliminado con aprobación del usuario; no tenía referencias en el código. |
+| 6 | `certificado-ejemplo.svg` | Eliminado con aprobación del usuario; no tenía referencias en el código. |
 
 ---
 
@@ -157,7 +155,7 @@ Usar convención:
 - [ ] Pasar el floral por la ruta SVG de `backgroundLoader.js` y quitar el recoloreado por píxeles para ese preset.
 - [ ] Agregar `COLOR_MAPS['rojo-floral']` con los colores exactos en `backgroundColors.js`.
 - [ ] Actualizar `logo.js` para cargar el SVG y rasterizarlo a un tamaño adecuado para impresión.
-- [ ] Mantener los archivos originales hasta la aprobación visual; eliminarlos en una rama posterior.
+- [x] Comparar `rojo-floral.svg` con el PNG al mismo tamaño y eliminar `public/backgrounds/rojo-floral.png`; el PNG sigue disponible en el historial de Git.
 - [ ] Actualizar pruebas de fondos, colores y carga.
 
 **Archivos principales:**
@@ -399,7 +397,7 @@ dateAlign: 'auto',
 
 **Tareas:**
 
-- [ ] Confirmar el destino de `src/assets/escudo.png` y `public/templates/certificado-ejemplo.svg`.
+- [x] Confirmar el destino de `src/assets/escudo.png` y `public/templates/certificado-ejemplo.svg`: eliminarlos por aprobación del usuario.
 - [ ] Eliminar assets sin uso si se aprueba.
 - [ ] Actualizar `README.md`.
 - [ ] Actualizar `src/certificates/README.md`.
@@ -538,5 +536,3 @@ Medir antes de implementar y repetir después de cada rama relevante.
 - `src/features/settings/SettingsPanel/sections/ContentSettings.jsx`
 - `src/features/settings/SettingsPanel/sections/DateSignatureSettings.jsx`
 - `public/backgrounds/rojo-floral.png`
-- `src/assets/logo-generico.png`
-- `src/assets/escudo.png`

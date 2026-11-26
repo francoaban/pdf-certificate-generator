@@ -65,20 +65,26 @@ function findText(texts, text) {
   return texts.find((entry) => entry.text === text)
 }
 
-test('alignment: auto preserves each style title and subtitle alignment', () => {
+test('alignment: auto centers title and subtitle when no logo is used', () => {
   for (const style of STYLES) {
     const texts = drawStyle(style)
     const title = findText(texts, DEFAULT_OPTIONS.title)
     const subtitle = findText(texts, DEFAULT_OPTIONS.subtitle)
 
-    if (style.id === 'moderno') {
-      assert.equal(title.left, 30, style.id)
-      assert.equal(subtitle.left, 30, style.id)
-    } else {
-      assert.equal(title.center, PAGE_WIDTH / 2, style.id)
-      assert.equal(subtitle.center, PAGE_WIDTH / 2, style.id)
-    }
+    assert.equal(title.center, PAGE_WIDTH / 2, style.id)
+    assert.equal(subtitle.center, PAGE_WIDTH / 2, style.id)
   }
+})
+
+test('alignment: modern auto keeps the header left-aligned when a logo is used', () => {
+  const logo = { dataUrl: 'data:image/png;base64,logo', ratio: 1 }
+  const modern = STYLES.find((style) => style.id === 'moderno')
+  const texts = drawStyle(modern, {}, logo)
+  const title = findText(texts, DEFAULT_OPTIONS.title)
+  const subtitle = findText(texts, DEFAULT_OPTIONS.subtitle)
+
+  assert.equal(title.left, 89)
+  assert.equal(subtitle.left, 89)
 })
 
 test('alignment: auto keeps location and date together on the right', () => {
@@ -131,18 +137,13 @@ test('alignment: left-aligned titles keep clear of the logo', () => {
   }
 })
 
-test('alignment: different location and date alignments use two lines', () => {
+test('alignment: date and location share one custom alignment and one line', () => {
   for (const style of STYLES) {
-    const texts = drawStyle(style, {
-      locationAlign: 'left',
-      dateAlign: 'right',
-    })
-    const location = findText(texts, 'San Salvador de Jujuy')
-    const date = texts.find((entry) => entry.text.includes('2026'))
+    const texts = drawStyle(style, { dateLocationAlign: 'left' })
+    const line = texts.find((entry) => entry.text.includes('2026'))
 
-    assert.equal(location.align, 'left', style.id)
-    assert.equal(location.x, 30, style.id)
-    assert.equal(date.align, 'right', style.id)
-    assert.equal(date.x, 267, style.id)
+    assert.match(line.text, /San Salvador de Jujuy · /, style.id)
+    assert.equal(line.align, 'left', style.id)
+    assert.equal(line.x, 30, style.id)
   }
 })

@@ -27,7 +27,34 @@ test-results/
 
 # Local tooling
 *.local
+*.local.*
 .playwright-cli/
+
+# AI assistants and coding agents
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.aider*
+.agent/
+.agents/
+.claude/
+.clinerules
+.clinerules/
+.codex/
+.continue/
+.copilot/
+.cursor/
+.gemini/
+.github/agents/
+.github/copilot-instructions.md
+.github/instructions/
+.kilocode/
+.mcp.json
+.opencode/
+.roo/
+.vscode/mcp.json
+.windsurf/
+.windsurfrules
 
 # Operating system files
 .DS_Store

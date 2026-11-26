@@ -23,7 +23,7 @@ export default function SettingsHeader({ sections, openSection, onToggle }) {
               onClick={() => onToggle(section.id)}
               aria-current={active ? 'true' : undefined}
               aria-expanded={active}
-              aria-controls={section.id}
+              aria-controls={active ? section.id : undefined}
               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
                 active
                   ? 'border-indigo-300 bg-indigo-600 text-white shadow-sm'
