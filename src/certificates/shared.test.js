@@ -22,7 +22,7 @@ test('shared: places the certificate logo top-left at 30% of the page height', (
   const box = drawCertificateLogo(doc, { dataUrl: 'logo.png', ratio: 1 })
 
   assert.equal(LOGO_HEIGHT_RATIO, 0.3)
-  assert.equal(box.y, 10)
+  assert.equal(box.y, 12)
   assert.equal(box.x, 14)
   assert.equal(box.height, PAGE_HEIGHT * 0.3)
   assert.equal(box.width, PAGE_HEIGHT * 0.3)
@@ -134,7 +134,7 @@ test('shared: positions letter-spaced text without relying on jsPDF align', () =
   )
 })
 
-test('shared: draws location and date on separate lines when alignments differ', () => {
+test('shared: draws location and date on one line with a shared alignment', () => {
   const doc = recordingDoc()
   const result = drawDateAndLocation(
     doc,
@@ -144,22 +144,20 @@ test('shared: draws location and date on separate lines when alignments differ',
       showProvince: false,
       showCountry: false,
       date: '2026-10-12',
-      locationAlign: 'left',
-      dateAlign: 'right',
+      dateLocationAlign: 'left',
     },
     { y: 100, size: 10 },
   )
 
-  assert.equal(result.lines, 2)
-  assert.equal(doc.calls[0].text, 'Jujuy')
+  assert.equal(result.lines, 1)
+  assert.equal(result.endY, 100)
+  assert.match(doc.calls[0].text, /^Jujuy · /)
   assert.equal(doc.calls[0].x, 30)
+  assert.equal(doc.calls[0].y, 100)
   assert.equal(doc.calls[0].options.align, 'left')
-  assert.equal(doc.calls[1].x, PAGE_WIDTH - 30)
-  assert.equal(doc.calls[1].options.align, 'right')
-  assert.ok(result.endY > 100)
 })
 
-test('shared: joins location and date when they share an alignment', () => {
+test('shared: centers the combined date and location line', () => {
   const doc = recordingDoc()
   const result = drawDateAndLocation(
     doc,
@@ -169,8 +167,7 @@ test('shared: joins location and date when they share an alignment', () => {
       showProvince: false,
       showCountry: false,
       date: '2026-10-12',
-      locationAlign: 'center',
-      dateAlign: 'center',
+      dateLocationAlign: 'center',
     },
     { y: 100, size: 10 },
   )
@@ -190,8 +187,7 @@ test('shared: draws only the date when there is no location', () => {
       showProvince: false,
       showCountry: false,
       date: '2026-10-12',
-      locationAlign: 'left',
-      dateAlign: 'right',
+      dateLocationAlign: 'right',
     },
     { y: 100, size: 10 },
   )

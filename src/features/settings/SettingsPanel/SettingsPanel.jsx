@@ -13,13 +13,13 @@ const SECTIONS = [
   {
     id: 'settings-content',
     number: '01',
-    title: 'Contenido',
+    title: 'Datos de Certificado',
     description: 'Editar textos y tipografías',
   },
   {
     id: 'settings-participant',
     number: '02',
-    title: 'Participante',
+    title: 'Datos del Participante',
     description: 'Nombre, documento y formato',
   },
   {
@@ -31,7 +31,7 @@ const SECTIONS = [
   {
     id: 'settings-date-signature',
     number: '04',
-    title: 'Fecha y firmas',
+    title: 'Fecha, ubicación y firmas',
     description: 'Configurar fecha, ubicación y firmas',
   },
   {
@@ -127,22 +127,21 @@ export default function SettingsPanel({
             configurationReady={configurationReady}
             importRef={importRef}
           />
+          <footer className="flex flex-wrap items-center justify-between gap-3 rounded-b-2xl border-t border-slate-200 bg-slate-50/70 px-5 py-3">
+            <p className="text-xs text-slate-500">
+              Los cambios se guardan automáticamente en este dispositivo.
+            </p>
+            <button
+              type="button"
+              onClick={resetOptions}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+            >
+              <span aria-hidden="true">↺</span>
+              Restaurar valores por defecto
+            </button>
+          </footer>
         </SettingsSection>
       </div>
-
-      <footer className="flex flex-wrap items-center justify-between gap-3 rounded-b-2xl border-t border-slate-200 bg-slate-50/70 px-5 py-3">
-        <p className="text-xs text-slate-500">
-          Los cambios se guardan automáticamente en este dispositivo.
-        </p>
-        <button
-          type="button"
-          onClick={resetOptions}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-        >
-          <span aria-hidden="true">↺</span>
-          Restaurar configuración
-        </button>
-      </footer>
     </div>
   )
 }

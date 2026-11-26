@@ -1,3 +1,4 @@
+import { resolveAlignment } from '../alignment.js'
 import { resolveNameFont, resolveTextFont } from '../fonts.js'
 import {
   PAGE_WIDTH,
@@ -41,10 +42,12 @@ export const modernStyle = {
       Math.max(left, logoBox ? logoBox.x + logoBox.width + 12 : left),
     )
     const headerWidth = Math.max(80, PAGE_WIDTH - 30 - headerLeft)
+    // Sin logo, el encabezado se centra en el ancho total de la hoja.
+    const headerFallback = logoBox ? 'left' : 'center'
 
     drawAlignedText(doc, options.title, 54, {
       alignment: options.titleAlign,
-      fallback: 'left',
+      fallback: headerFallback,
       left: headerLeft,
       right: PAGE_WIDTH - 30,
       size: scale(32, 'titleSize'),
@@ -56,7 +59,7 @@ export const modernStyle = {
 
     drawAlignedText(doc, options.subtitle, 62, {
       alignment: options.subtitleAlign,
-      fallback: 'left',
+      fallback: headerFallback,
       left: headerLeft,
       right: PAGE_WIDTH - 30,
       size: scale(9, 'subtitleSize'),
@@ -67,10 +70,19 @@ export const modernStyle = {
       maxWidth: headerWidth,
     })
 
-    const lineEnd = headerLeft + Math.min(66, headerWidth)
+    const accentWidth = Math.min(66, headerWidth)
+    const headerRight = PAGE_WIDTH - 30
+    const titleAlignment = resolveAlignment(options.titleAlign, headerFallback)
+    const accentLeft =
+      titleAlignment === 'center'
+        ? (headerLeft + headerRight) / 2 - accentWidth / 2
+        : titleAlignment === 'right'
+          ? headerRight - accentWidth
+          : headerLeft
+    const lineEnd = accentLeft + accentWidth
     doc.setDrawColor(...TEAL)
     doc.setLineWidth(0.9)
-    doc.line(headerLeft, 68, lineEnd, 68)
+    doc.line(accentLeft, 68, lineEnd, 68)
     doc.setFillColor(...GOLD)
     doc.rect(lineEnd, 66.8, 2.4, 2.4, 'F')
 

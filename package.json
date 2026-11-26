@@ -1,9 +1,21 @@
 {
-  "name": "certificados",
+  "name": "pdf-certificate-generator",
   "private": true,
-  "version": "0.0.0",
-  "description": "Genera certificados PDF desde planillas Excel o CSV, con soporte sin conexión.",
+  "version": "0.1.0",
+  "description": "Aplicación web progresiva y de escritorio para generar certificados PDF por lote desde Excel o CSV, con procesamiento local y soporte sin conexión.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/francoaban/pdf-certificate-generator.git"
+  },
+  "keywords": [
+    "certificados",
+    "PDF",
+    "Excel",
+    "CSV",
+    "PWA",
+    "Electron"
+  ],
   "packageManager": "pnpm@11.10.0",
   "engines": {
     "node": ">=22.12.0"
@@ -16,6 +28,7 @@
     "desktop": "electron .",
     "desktop:dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && electron . --dev\"",
     "lint": "eslint .",
+    "optimize:svg": "svgo -f public/backgrounds && svgo public/favicon.svg src/assets/logo-generico.svg",
     "preview": "vite preview",
     "test": "vitest run"
   },
@@ -42,6 +55,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.13.0",
+    "svgo": "^4.1.0",
     "wait-on": "^8.0.3",
     "vite": "^8.3.5",
     "vite-plugin-pwa": "^2.0.0",

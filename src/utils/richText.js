@@ -1,5 +1,5 @@
-const BOLD_MARKER = '**'
-const BOLD_PATTERN = /\*\*([\s\S]+?)\*\*/g
+const MARKER_RE = /\*+/g
+const RICH_TEXT_PAIR_RE = /\*\*\*[\s\S]+?\*\*\*|\*\*[\s\S]+?\*\*|\*[\s\S]+?\*/
 const STANDARD_FONTS = new Set([
   'helvetica',
   'times',
@@ -10,38 +10,139 @@ const STANDARD_FONTS = new Set([
 export const SYNTHETIC_BOLD_OFFSET = 0.18
 
 export function hasBoldMarkup(text) {
-  return typeof text === 'string' && text.includes(BOLD_MARKER)
+  return typeof text === 'string' && text.includes('**')
 }
 
-export function parseBoldText(text) {
-  const source = String(text ?? '')
-  if (!source) return []
-  if (!source.includes(BOLD_MARKER)) return [{ text: source, bold: false }]
+export function hasRichTextMarkup(text) {
+  return typeof text === 'string' && RICH_TEXT_PAIR_RE.test(text)
+}
 
+function markerFlags(length) {
+  if (length >= 3) return { bold: true, italic: true }
+  if (length === 2) return { bold: true, italic: false }
+  return { bold: false, italic: true }
+}
+
+function findClosingMarker(source, from, length) {
+  MARKER_RE.lastIndex = from
+  let match
+  while ((match = MARKER_RE.exec(source)) !== null) {
+    if (match[0].length === length) return match.index
+  }
+  return -1
+}
+
+function mergeSegments(segments) {
+  const merged = []
+  for (const segment of segments) {
+    if (!segment.text) continue
+    const previous = merged[merged.length - 1]
+    if (
+      previous &&
+      previous.bold === segment.bold &&
+      previous.italic === segment.italic
+    ) {
+      previous.text += segment.text
+    } else {
+      merged.push({ ...segment })
+    }
+  }
+  return merged
+}
+
+function parseRichSource(source, inherited) {
   const segments = []
   let cursor = 0
-  let match
-  BOLD_PATTERN.lastIndex = 0
 
-  while ((match = BOLD_PATTERN.exec(source)) !== null) {
-    if (match.index > cursor) {
-      segments.push({ text: source.slice(cursor, match.index), bold: false })
+  while (cursor < source.length) {
+    MARKER_RE.lastIndex = cursor
+    const open = MARKER_RE.exec(source)
+    if (!open) break
+
+    const marker = open[0]
+    const openIndex = open.index
+    if (openIndex > cursor) {
+      segments.push({
+        text: source.slice(cursor, openIndex),
+        bold: inherited.bold,
+        italic: inherited.italic,
+      })
     }
-    if (match[1]) segments.push({ text: match[1], bold: true })
-    cursor = match.index + match[0].length
+
+    const closeIndex = findClosingMarker(
+      source,
+      openIndex + marker.length,
+      marker.length,
+    )
+
+    if (closeIndex === -1) {
+      // Marcador sin cierre: se conserva como texto literal.
+      segments.push({
+        text: marker,
+        bold: inherited.bold,
+        italic: inherited.italic,
+      })
+      cursor = openIndex + marker.length
+      continue
+    }
+
+    const flags = markerFlags(marker.length)
+    const innerInherited = {
+      bold: inherited.bold || flags.bold,
+      italic: inherited.italic || flags.italic,
+    }
+    const inner = source.slice(openIndex + marker.length, closeIndex)
+    segments.push(...parseRichSource(inner, innerInherited))
+    cursor = closeIndex + marker.length
   }
 
   if (cursor < source.length) {
-    segments.push({ text: source.slice(cursor), bold: false })
+    segments.push({
+      text: source.slice(cursor),
+      bold: inherited.bold,
+      italic: inherited.italic,
+    })
   }
 
-  return segments.length ? segments : [{ text: source, bold: false }]
+  return segments
 }
 
-export function stripBoldMarkup(text) {
-  return parseBoldText(text)
+/**
+ * Convierte el texto con marcadores en segmentos con formato.
+ * `**negrita**`, `*cursiva*` y `***negrita y cursiva***` se pueden combinar.
+ */
+export function parseRichText(text) {
+  const source = String(text ?? '')
+  if (!source) return []
+  if (!source.includes('*')) {
+    return [{ text: source, bold: false, italic: false }]
+  }
+
+  const segments = mergeSegments(
+    parseRichSource(source, { bold: false, italic: false }),
+  )
+  return segments.length
+    ? segments
+    : [{ text: source, bold: false, italic: false }]
+}
+
+/** Compatibilidad: devuelve solo la información de negrita. */
+export function parseBoldText(text) {
+  return parseRichText(text).map(({ text: value, bold }) => ({
+    text: value,
+    bold,
+  }))
+}
+
+export function stripRichTextMarkup(text) {
+  return parseRichText(text)
     .map((segment) => segment.text)
     .join('')
+}
+
+/** Compatibilidad con el nombre anterior. */
+export function stripBoldMarkup(text) {
+  return stripRichTextMarkup(text)
 }
 
 export function isStandardFont(font = '') {
@@ -57,6 +158,30 @@ export function safeFontStyle(font, style = 'normal') {
   return 'normal'
 }
 
+function combineFontStyle(style, bold, italic) {
+  const base = String(style || 'normal')
+  const wantBold = base.includes('bold') || bold
+  const wantItalic = base.includes('italic') || italic
+  if (wantBold && wantItalic) return 'bolditalic'
+  if (wantBold) return 'bold'
+  if (wantItalic) return 'italic'
+  return 'normal'
+}
+
+/**
+ * Resuelve el estilo de un segmento. Las fuentes estándar admiten negrita,
+ * cursiva y ambas; las TTF personalizadas conservan su estilo normal.
+ */
+export function resolveFontStyle(
+  font,
+  style = 'normal',
+  bold = false,
+  italic = false,
+) {
+  if (!isStandardFont(font)) return 'normal'
+  return combineFontStyle(style, bold, italic)
+}
+
 export function needsSyntheticBold(font, style = 'normal', bold = false) {
   return !isStandardFont(font) && (bold || String(style).includes('bold'))
 }
@@ -66,17 +191,12 @@ function segmentWidth(doc, text, charSpace = 0) {
   return doc.getTextWidth(text) + (charSpace ? charSpace * text.length : 0)
 }
 
-function applySegmentFont(doc, font, style, bold) {
-  const boldStyle = isStandardFont(font) && bold
-    ? style === 'italic' || style === 'bolditalic'
-      ? 'bolditalic'
-      : 'bold'
-    : safeFontStyle(font, style)
-  doc.setFont(font, boldStyle)
+function applySegmentFont(doc, font, style, bold, italic) {
+  doc.setFont(font, resolveFontStyle(font, style, bold, italic))
 }
 
-function drawSegment(doc, font, style, bold, text, x, y) {
-  applySegmentFont(doc, font, style, bold)
+function drawSegment(doc, font, style, bold, italic, text, x, y) {
+  applySegmentFont(doc, font, style, bold, italic)
   doc.text(text, x, y, { align: 'left' })
   if (needsSyntheticBold(font, style, bold)) {
     doc.text(text, x + SYNTHETIC_BOLD_OFFSET, y, { align: 'left' })
@@ -99,12 +219,12 @@ export function drawRichText(
     minSize = 8,
   } = {},
 ) {
-  const segments = parseBoldText(text)
+  const segments = parseRichText(text)
   if (!segments.length) return size
 
   const measure = () =>
     segments.reduce((total, segment) => {
-      applySegmentFont(doc, font, style, segment.bold)
+      applySegmentFont(doc, font, style, segment.bold, segment.italic)
       return total + segmentWidth(doc, segment.text, charSpace)
     }, 0)
   const measureVisible = () => {
@@ -134,7 +254,16 @@ export function drawRichText(
 
   for (const segment of segments) {
     if (!segment.text) continue
-    drawSegment(doc, font, style, segment.bold, segment.text, cursor, y)
+    drawSegment(
+      doc,
+      font,
+      style,
+      segment.bold,
+      segment.italic,
+      segment.text,
+      cursor,
+      y,
+    )
     cursor += segmentWidth(doc, segment.text, charSpace)
   }
 
@@ -144,16 +273,26 @@ export function drawRichText(
 
 function tokenizeRichText(text) {
   const tokens = []
-  for (const segment of parseBoldText(text)) {
+  for (const segment of parseRichText(text)) {
     const parts = segment.text.split(/(\r?\n|[ \t]+)/)
     for (const part of parts) {
       if (!part) continue
       if (/^\r?\n$/.test(part)) {
         tokens.push({ type: 'break' })
       } else if (/^[ \t]+$/.test(part)) {
-        tokens.push({ type: 'space', text: part, bold: false })
+        tokens.push({
+          type: 'space',
+          text: part,
+          bold: segment.bold,
+          italic: segment.italic,
+        })
       } else {
-        tokens.push({ type: 'word', text: part, bold: segment.bold })
+        tokens.push({
+          type: 'word',
+          text: part,
+          bold: segment.bold,
+          italic: segment.italic,
+        })
       }
     }
   }
@@ -162,7 +301,7 @@ function tokenizeRichText(text) {
 
 function measureToken(doc, token, font, style) {
   if (token.type === 'break') return 0
-  applySegmentFont(doc, font, style, token.bold)
+  applySegmentFont(doc, font, style, token.bold, token.italic)
   return segmentWidth(doc, token.text)
 }
 
@@ -227,10 +366,13 @@ function mergeLineTokens(line) {
 
     if (
       previous &&
-      (previous.bold === token.bold || previousIsSpace || tokenIsSpace)
+      ((previous.bold === token.bold && previous.italic === token.italic) ||
+        previousIsSpace ||
+        tokenIsSpace)
     ) {
       previous.text += token.text
       previous.bold = tokenIsSpace ? previous.bold : token.bold
+      previous.italic = tokenIsSpace ? previous.italic : token.italic
       previous.type = previousIsSpace && !tokenIsSpace ? token.type : previous.type
     } else {
       merged.push({ ...token })
@@ -242,7 +384,7 @@ function mergeLineTokens(line) {
 function drawRichLine(doc, line, x, y, { font, style, align }) {
   const tokens = mergeLineTokens(line)
   const totalWidth = tokens.reduce((total, token) => {
-    applySegmentFont(doc, font, style, token.bold)
+    applySegmentFont(doc, font, style, token.bold, token.italic)
     return total + segmentWidth(doc, token.text)
   }, 0)
 
@@ -254,8 +396,16 @@ function drawRichLine(doc, line, x, y, { font, style, align }) {
         : x
 
   for (const token of tokens) {
-    applySegmentFont(doc, font, style, token.bold)
-    drawSegment(doc, font, style, token.bold, token.text, cursor, y)
+    drawSegment(
+      doc,
+      font,
+      style,
+      token.bold,
+      token.italic,
+      token.text,
+      cursor,
+      y,
+    )
     cursor += segmentWidth(doc, token.text)
   }
 }

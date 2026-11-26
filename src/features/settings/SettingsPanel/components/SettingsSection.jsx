@@ -7,6 +7,8 @@ export default function SettingsSection({
   onToggle,
   children,
 }) {
+  if (!open) return null
+
   return (
     <section className="px-5 py-4">
       <div className="mb-2 flex items-baseline gap-2">
@@ -43,7 +45,7 @@ export default function SettingsSection({
               aria-hidden="true"
               className="hidden rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700 sm:inline"
             >
-              Activa
+              Cerrar
             </span>
           )}
           <span

@@ -47,6 +47,7 @@ const STRING_LIMITS = {
 const BOOLEAN_FIELDS = [
   'useLogo',
   'backgroundFromLogo',
+  'showWatermarkImage',
   'showDocument',
   'docDots',
   'showCity',
@@ -57,7 +58,12 @@ const BOOLEAN_FIELDS = [
   'showVerificationQr',
 ]
 
-const ASSET_FIELDS = ['customLogo', 'signatureLeftImage', 'signatureRightImage']
+const ASSET_FIELDS = [
+  'customLogo',
+  'watermarkImage',
+  'signatureLeftImage',
+  'signatureRightImage',
+]
 const URL_FIELDS = ['background']
 
 const DATA_IMAGE_RE = /^data:image\/(?:png|jpeg|webp);base64,[a-z0-9+/]+={0,2}$/i
@@ -242,6 +248,21 @@ function normalizeImageBackground(value, strict, warnings) {
   )
 }
 
+function migrateDateLocationAlign(input) {
+  if (input.dateLocationAlign !== undefined) return input.dateLocationAlign
+
+  const date = input.dateAlign
+  const location = input.locationAlign
+  if (date === undefined && location === undefined) return undefined
+  if (date === location) return date
+  if (date === undefined || date === 'auto') return location
+  if (location === undefined || location === 'auto') return date
+
+  // Configuraciones antiguas con alineaciones distintas: se vuelve al valor
+  // automático para no imponer una de las dos.
+  return 'auto'
+}
+
 /**
  * Valida y normaliza opciones provenientes de localStorage o de un JSON
  * importado. En modo estricto lanza un error ante cualquier valor inválido; en
@@ -307,14 +328,13 @@ export function normalizeOptions(input, { strict = false } = {}) {
     strict,
     warnings,
   )
-  for (const field of [
-    'titleAlign',
-    'subtitleAlign',
-    'locationAlign',
-    'dateAlign',
-  ]) {
+  for (const field of ['titleAlign', 'subtitleAlign', 'dateLocationAlign']) {
+    const value =
+      field === 'dateLocationAlign'
+        ? migrateDateLocationAlign(input)
+        : merged[field]
     options[field] = normalizeEnum(
-      merged[field],
+      value,
       field,
       TEXT_ALIGNMENT_IDS,
       DEFAULT_OPTIONS[field],

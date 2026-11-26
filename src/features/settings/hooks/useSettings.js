@@ -5,6 +5,7 @@ import { hydrateOptionAssets, readOptions, saveOptions } from '../../../utils/op
 
 const ASSET_FIELDS = [
   'customLogo',
+  'watermarkImage',
   'imageBackground',
   'background',
   'signatureLeftImage',

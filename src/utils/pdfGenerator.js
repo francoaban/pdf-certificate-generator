@@ -8,7 +8,7 @@ import { loadBackground } from './backgroundLoader'
 import { DEFAULT_OPTIONS, getCurrentDate } from '../certificates/defaults'
 import { getFontEntries } from '../certificates/fonts'
 import { getStyle } from '../certificates/styles/index'
-import { stripBoldMarkup } from './richText'
+import { stripRichTextMarkup } from './richText'
 import {
   applyFonts,
   composePlaceLine,
@@ -59,15 +59,18 @@ async function prepare(options) {
     ),
   ])
 
-  return { opts, style, logo, background, fonts }
+  const watermark =
+    opts.showWatermarkImage && opts.watermarkImage ? opts.watermarkImage : null
+
+  return { opts, style, logo, background, watermark, fonts }
 }
 
 /* ---------- Documento ---------- */
-function createDoc({ background, fonts, logo, opts }) {
+function createDoc({ background, fonts, logo, opts, watermark }) {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true })
   applyFonts(doc, fonts)
   addBackground(doc, background, opts?.backgroundFit)
-  addBackgroundLogo(doc, logo, opts)
+  addExclusiveWatermark(doc, logo, opts, watermark)
   return doc
 }
 
@@ -86,26 +89,35 @@ function addBackground(doc, background, fit = 'cover') {
   )
 }
 
-function addBackgroundLogo(doc, logo, opts) {
-  if (!opts?.backgroundFromLogo || !opts.customLogo || !logo) return
+function addFadedCenteredImage(doc, image, alias) {
+  if (!image?.dataUrl) return
 
   const ratio =
-    logo.ratio || (logo.width && logo.height ? logo.width / logo.height : 1)
+    image.ratio || (image.width && image.height ? image.width / image.height : 1)
   const box = fitLogoWatermark(ratio, W, H)
 
   doc.saveGraphicsState()
   doc.setGState(new doc.GState({ opacity: BACKGROUND_LOGO_OPACITY }))
   doc.addImage(
-    logo.dataUrl,
+    image.dataUrl,
     'PNG',
     box.x,
     box.y,
     box.width,
     box.height,
-    'background-logo',
+    alias,
     'FAST',
   )
   doc.restoreGraphicsState()
+}
+
+function addExclusiveWatermark(doc, logo, opts, watermark) {
+  if (watermark) {
+    addFadedCenteredImage(doc, watermark, 'watermark-image')
+    return
+  }
+  if (!opts?.backgroundFromLogo || !opts.customLogo || !logo) return
+  addFadedCenteredImage(doc, logo, 'background-logo')
 }
 
 const QR_CACHE = new Map()
@@ -163,11 +175,11 @@ async function drawCertificate(doc, record, opts, style, logo, signal) {
   const view = resolveRecord(record, certificateOptions)
 
   doc.setProperties({
-    title: `${stripBoldMarkup(opts.title) || 'Certificado'} - ${view.fullName}`,
-    subject: stripBoldMarkup(opts.subtitle || ''),
+    title: `${stripRichTextMarkup(opts.title) || 'Certificado'} - ${view.fullName}`,
+    subject: stripRichTextMarkup(opts.subtitle || ''),
     author: composePlaceLine(certificateOptions),
     creator: 'Generador de certificados (jsPDF)',
-    keywords: [stripBoldMarkup(opts.title), view.fullName, view.docDisplay]
+    keywords: [stripRichTextMarkup(opts.title), view.fullName, view.docDisplay]
       .filter(Boolean)
       .join(', '),
   })
@@ -222,7 +234,7 @@ async function drawCertificate(doc, record, opts, style, logo, signal) {
 const newPage = (doc, context) => {
   doc.addPage('a4', 'landscape')
   addBackground(doc, context.background, context.opts?.backgroundFit)
-  addBackgroundLogo(doc, context.logo, context.opts)
+  addExclusiveWatermark(doc, context.logo, context.opts, context.watermark)
 }
 
 function downloadBlob(blob, filename) {

@@ -2,7 +2,7 @@ import { getCurrentDate } from '../../../../certificates/defaults.js'
 import SignaturePicker from '../../components/SignaturePicker'
 import AlignmentField from '../components/AlignmentField'
 import RangeField from '../components/RangeField'
-import SettingsCard, {
+import {
   Field,
   GroupTitle,
   OptionalLocationField,
@@ -17,8 +17,17 @@ export default function DateSignatureSettings({
 }) {
   return (
     <>
-      <SettingsCard className="grid divide-y divide-slate-200 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-        <div className="p-3">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <GroupTitle hint="La fecha y la ubicación se muestran juntas debajo del cuerpo, en una sola línea. La ubicación es opcional y admite **negrita**, *cursiva* y ***ambas***.">
+            Fecha y ubicación
+          </GroupTitle>
+          <span className="rounded-full bg-indigo-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-700">
+            Ubicación opcional
+          </span>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
           <Field
             label="Fecha"
             hint="Si la planilla trae una fecha por fila, esa fecha tiene prioridad sobre esta fecha general."
@@ -31,96 +40,22 @@ export default function DateSignatureSettings({
               onChange={set('date')}
             />
           </Field>
-        </div>
-        <div className="p-3">
-          <Field
-            label="Firma izquierda"
-            hint="Nombre o cargo que aparece debajo de la línea de firma izquierda."
-          >
-            <input
-              className={inputClass}
-              maxLength={100}
-              value={options.signatureLeft}
-              onChange={set('signatureLeft')}
-            />
-          </Field>
-        </div>
-        <div className="p-3">
-          <Field
-            label="Firma derecha"
-            hint="Nombre o cargo que aparece debajo de la línea de firma derecha."
-          >
-            <input
-              className={inputClass}
-              maxLength={100}
-              value={options.signatureRight}
-              onChange={set('signatureRight')}
-            />
-          </Field>
-        </div>
-      </SettingsCard>
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <RangeField
-          label="Tamaño de fecha y ubicación"
-          hint="Ajusta en conjunto la fecha y la ubicación que se muestran debajo del cuerpo."
-          value={options.dateSize}
-          onChange={(value) => onChange({ ...options, dateSize: value })}
-        />
-        <RangeField
-          label="Tamaño de las firmas"
-          hint="Ajusta solo los nombres o cargos de las firmas."
-          value={options.signatureSize}
-          onChange={(value) => onChange({ ...options, signatureSize: value })}
-        />
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <AlignmentField
-          label="Alineación de la fecha"
-          hint="«Automática» conserva la alineación del estilo. Si coincide con la de la ubicación, se muestran en una sola línea."
-          value={options.dateAlign}
-          onChange={(value) => onChange({ ...options, dateAlign: value })}
-        />
-        <AlignmentField
-          label="Alineación de la ubicación"
-          hint="«Automática» conserva la alineación del estilo. Si no hay ubicación, solo se muestra la fecha."
-          value={options.locationAlign}
-          onChange={(value) => onChange({ ...options, locationAlign: value })}
-        />
-      </div>
-
-      <div className="space-y-3 border-t border-slate-100 pt-4">
-        <GroupTitle hint="Las imágenes de firma deben ser PNG con fondo transparente y un máximo de 5 MB.">
-          Imágenes de firmas
-        </GroupTitle>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <SignaturePicker
-            label="Firma izquierda"
-            value={options.signatureLeftImage}
-            onChange={(image) =>
-              onChange({ ...options, signatureLeftImage: image })
-            }
+          <RangeField
+            label="Tamaño de fecha y ubicación"
+            hint="Ajusta en conjunto la fecha y la ubicación que se muestran debajo del cuerpo."
+            value={options.dateSize}
+            onChange={(value) => onChange({ ...options, dateSize: value })}
           />
-          <SignaturePicker
-            label="Firma derecha"
-            value={options.signatureRightImage}
-            onChange={(image) =>
-              onChange({ ...options, signatureRightImage: image })
+          <AlignmentField
+            label="Alineación de fecha y ubicación"
+            hint="«Automática» conserva la alineación del estilo. La fecha y la ubicación comparten esta alineación y siempre se dibujan en una sola línea."
+            value={options.dateLocationAlign}
+            onChange={(value) =>
+              onChange({ ...options, dateLocationAlign: value })
             }
           />
         </div>
-      </div>
 
-      <div className="space-y-4 border-t border-slate-100 pt-4">
-        <div className="flex items-center justify-between gap-3">
-          <GroupTitle hint="La ubicación se muestra debajo del cuerpo, alineada a la derecha, junto con la fecha.">
-            Ubicación
-          </GroupTitle>
-          <span className="rounded-full bg-indigo-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-700">
-            Opcional
-          </span>
-        </div>
         <div className="grid gap-3 sm:grid-cols-3">
           <OptionalLocationField
             label="Ciudad"
@@ -150,13 +85,67 @@ export default function DateSignatureSettings({
             placeholder="Argentina"
           />
         </div>
+
+        <p className="text-xs text-slate-500">
+          Las fechas válidas se muestran como «12 de octubre de 2026». Si la
+          planilla trae una fecha en la fila, esa fecha tiene prioridad sobre la
+          fecha general.
+        </p>
       </div>
 
-      <p className="text-xs text-slate-500">
-        Las fechas válidas se muestran como «12 de octubre de 2026». Si la
-        planilla trae una fecha en la fila, esa fecha tiene prioridad sobre la
-        fecha general.
-      </p>
+      <div className="space-y-3 border-t border-slate-100 pt-4">
+        <GroupTitle hint="Los nombres o cargos aparecen debajo de las líneas de firma. Las imágenes deben ser PNG con fondo transparente y un máximo de 5 MB. Los textos admiten **negrita**, *cursiva* y ***ambas***.">
+          Firmas
+        </GroupTitle>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field
+            label="Texto firma izquierda"
+            hint="Nombre o cargo que aparece debajo de la línea de firma izquierda."
+          >
+            <input
+              className={inputClass}
+              maxLength={100}
+              value={options.signatureLeft}
+              onChange={set('signatureLeft')}
+            />
+          </Field>
+          <Field
+            label="Texto firma derecha"
+            hint="Nombre o cargo que aparece debajo de la línea de firma derecha."
+          >
+            <input
+              className={inputClass}
+              maxLength={100}
+              value={options.signatureRight}
+              onChange={set('signatureRight')}
+            />
+          </Field>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <SignaturePicker
+            label="Imagen firma izquierda"
+            value={options.signatureLeftImage}
+            onChange={(image) =>
+              onChange({ ...options, signatureLeftImage: image })
+            }
+          />
+          <SignaturePicker
+            label="Imagen firma derecha"
+            value={options.signatureRightImage}
+            onChange={(image) =>
+              onChange({ ...options, signatureRightImage: image })
+            }
+          />
+        </div>
+        <div className="sm:max-w-xs">
+          <RangeField
+            label="Tamaño de las firmas"
+            hint="Ajusta solo los nombres o cargos de las firmas."
+            value={options.signatureSize}
+            onChange={(value) => onChange({ ...options, signatureSize: value })}
+          />
+        </div>
+      </div>
     </>
   )
 }

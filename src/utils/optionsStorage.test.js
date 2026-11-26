@@ -61,6 +61,23 @@ test('keeps assets in localStorage when they were not stored in IndexedDB', asyn
   assert.deepEqual(saved.customLogo, customLogo)
 })
 
+test('treats the watermark image as an asset like the logo', async () => {
+  const store = stubStorage()
+  const watermarkImage = {
+    dataUrl: 'data:image/png;base64,AAA',
+    ratio: 1,
+    name: 'marca.png',
+  }
+
+  await saveOptions(
+    { ...DEFAULT_OPTIONS, watermarkImage },
+    { saveAssets: false, assetsStored: true },
+  )
+
+  const saved = JSON.parse(store.get(STORAGE_KEY))
+  assert.equal(Object.hasOwn(saved, 'watermarkImage'), false)
+})
+
 test('treats the background image as an asset like the logo', async () => {
   const store = stubStorage()
   const imageBackground = {

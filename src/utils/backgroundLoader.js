@@ -1,31 +1,9 @@
-import { BACKGROUND_PRESETS } from '../certificates/backgrounds.js'
+import { findBackgroundPreset } from '../certificates/backgrounds.js'
 import { loadImageAsset, publicUrl } from '../certificates/shared.js'
 import { colorizeBackgroundSvg } from './backgroundColors.js'
 
 const COLORIZED_CACHE = new Map()
 const MAX_CACHE_ENTRIES = 24
-
-// Fuentes antiguas que deben seguir resolviendo al preset actual.
-const LEGACY_PRESET_SOURCES = new Map([
-  ['backgrounds/rojo-floral.png', 'rojo-floral'],
-])
-
-function normalizeSource(source) {
-  return typeof source === 'string' ? source.replace(/^\.?\//, '') : null
-}
-
-function findPreset(source) {
-  const normalized = normalizeSource(source)
-  if (!normalized) return null
-
-  const legacyId = LEGACY_PRESET_SOURCES.get(normalized.toLowerCase())
-  return (
-    BACKGROUND_PRESETS.find(
-      (preset) =>
-        preset.src === normalized || (legacyId && preset.id === legacyId),
-    ) || null
-  )
-}
 
 /**
  * Carga un fondo. Si es un SVG predeterminado y hay colores personalizados,
@@ -34,7 +12,7 @@ function findPreset(source) {
  */
 export async function loadBackground(source, options = {}) {
   const { primaryColor, secondaryColor, ...assetOptions } = options
-  const preset = findPreset(source)
+  const preset = findBackgroundPreset(source)
   const resolvedSource = preset?.src || source
 
   if (!preset?.palette || (!primaryColor && !secondaryColor)) {

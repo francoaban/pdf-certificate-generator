@@ -12,6 +12,8 @@ test('schema: accepts valid options and fills missing values with defaults', () 
     normalizeOptions({ backgroundFromLogo: true }).options.backgroundFromLogo,
     true,
   )
+  assert.equal(options.showWatermarkImage, false)
+  assert.equal(options.watermarkImage, null)
   assert.deepEqual(warnings, [])
 })
 
@@ -33,6 +35,14 @@ test('schema: strict mode rejects invalid enums, booleans and assets', () => {
     () => normalizeOptions({ customLogo: { url: 'x' } }, { strict: true }),
     /imagen válida/i,
   )
+  assert.throws(
+    () => normalizeOptions({ watermarkImage: { url: 'x' } }, { strict: true }),
+    /imagen válida/i,
+  )
+  assert.throws(
+    () => normalizeOptions({ showWatermarkImage: 'sí' }, { strict: true }),
+    /verdadera o falsa/i,
+  )
 })
 
 test('schema: tolerant mode sanitizes bad values instead of breaking the app', () => {
@@ -40,12 +50,14 @@ test('schema: tolerant mode sanitizes bad values instead of breaking the app', (
     title: 42,
     useLogo: 'false',
     customLogo: { dataUrl: 'javascript:alert(1)' },
+    watermarkImage: { dataUrl: 'javascript:alert(1)' },
     imageBackground: 'javascript:alert(1)',
   })
 
   assert.equal(options.title, DEFAULT_OPTIONS.title)
   assert.equal(options.useLogo, false)
   assert.equal(options.customLogo, null)
+  assert.equal(options.watermarkImage, null)
   assert.equal(options.imageBackground, null)
   assert.ok(warnings.length >= 3)
 })
@@ -115,13 +127,8 @@ test('schema: migrates the old global font scale to each text', () => {
   assert.equal(options.signatureSize, 120)
 })
 
-test('schema: validates independent text alignments', () => {
-  for (const field of [
-    'titleAlign',
-    'subtitleAlign',
-    'locationAlign',
-    'dateAlign',
-  ]) {
+test('schema: validates text alignments', () => {
+  for (const field of ['titleAlign', 'subtitleAlign', 'dateLocationAlign']) {
     for (const value of ['auto', 'left', 'center', 'right']) {
       assert.equal(normalizeOptions({ [field]: value }).options[field], value)
     }
@@ -134,6 +141,25 @@ test('schema: validates independent text alignments', () => {
       new RegExp(field, 'i'),
     )
   }
+})
+
+test('schema: migrates separate date and location alignments to one value', () => {
+  const equal = normalizeOptions({
+    dateAlign: 'left',
+    locationAlign: 'left',
+  }).options
+  assert.equal(equal.dateLocationAlign, 'left')
+  assert.equal(equal.dateAlign, undefined)
+  assert.equal(equal.locationAlign, undefined)
+
+  const alignOf = (input) => normalizeOptions(input).options.dateLocationAlign
+  assert.equal(alignOf({ dateAlign: 'right', locationAlign: 'auto' }), 'right')
+  assert.equal(alignOf({ dateAlign: 'auto', locationAlign: 'center' }), 'center')
+  assert.equal(alignOf({ dateAlign: 'left', locationAlign: 'right' }), 'auto')
+  assert.equal(
+    alignOf({ dateLocationAlign: 'center', dateAlign: 'left' }),
+    'center',
+  )
 })
 
 test('schema: validates the background fit mode', () => {
@@ -193,6 +219,21 @@ test('schema: only accepts safe image sources', () => {
       url,
     )
   }
+})
+
+test('schema: accepts an uploaded watermark image', () => {
+  const watermarkImage = {
+    dataUrl: 'data:image/png;base64,AAAA',
+    ratio: 1,
+    name: 'marca.png',
+  }
+
+  const { options } = normalizeOptions({
+    watermarkImage,
+    showWatermarkImage: true,
+  })
+  assert.deepEqual(options.watermarkImage, watermarkImage)
+  assert.equal(options.showWatermarkImage, true)
 })
 
 test('schema: accepts uploaded background assets and legacy URL strings', () => {

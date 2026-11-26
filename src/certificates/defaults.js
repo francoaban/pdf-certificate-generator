@@ -23,8 +23,7 @@ export const DEFAULT_OPTIONS = {
   subtitle: 'DE RECONOCIMIENTO',
   titleAlign: 'auto', // auto | left | center | right
   subtitleAlign: 'auto',
-  locationAlign: 'auto',
-  dateAlign: 'auto',
+  dateLocationAlign: 'auto', // alineación compartida por fecha y ubicación
   preText: 'Se otorga el presente certificado a',
   bodyText: 'Por su destacada participación y compromiso, otorgándose el presente en reconocimiento a su dedicación y esfuerzo.',
   titleFont: 'auto', // auto conserva la fuente del estilo
@@ -42,9 +41,11 @@ export const DEFAULT_OPTIONS = {
   signatureLeft: 'Director/a',
   signatureRight: 'Coordinador/a',
   date: '',
-  useLogo: true,
+  useLogo: false,
   customLogo: null,
   backgroundFromLogo: true, // marca de agua con el logo personalizado
+  watermarkImage: null, // marca de agua independiente, mismas reglas que el logo
+  showWatermarkImage: false,
   signatureLeftImage: null,
   signatureRightImage: null,
   caseMode: 'title', // asis | upper | title

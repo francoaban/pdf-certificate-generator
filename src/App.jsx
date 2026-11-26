@@ -103,7 +103,7 @@ export default function App() {
             Generador de certificados
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-            Subí una planilla con nombres y apellidos (documento opcional) y descargá los certificados en PDF.
+            Genera certificados en formato PDF desde una planilla de Excel o un archivo CSV.
           </p>
           {canInstall && (
             <button
